@@ -12,11 +12,11 @@ const deleteFileFromDisk = (filePath) => {
   }
 };
 
-// 1. CREATE Shop Type with Icon Image
+// 1. CREATE Shop Type
 // POST /api/admin/shopkeeper/shoptype
 const createShopType = async (req, res) => {
   try {
-    const { name, subtitle, sortOrder, isActive } = req.body;
+    const { name, subtitle, isActive } = req.body;
 
     if (!name || !subtitle) {
       if (req.file) deleteFileFromDisk(req.file.path);
@@ -39,17 +39,22 @@ const createShopType = async (req, res) => {
       });
     }
 
-    // Agar image aayi hai toh uska path set karein
+    // Image file ka path
     const iconPath = req.file
       ? `/uploads/shoptypes/${req.file.filename}`
       : "";
+
+    // isActive boolean format me convert
+    const activeStatus =
+      isActive !== undefined
+        ? isActive === "true" || isActive === true
+        : true;
 
     const shopType = await ShopType.create({
       name: name.trim(),
       subtitle: subtitle.trim(),
       icon: iconPath,
-      sortOrder: sortOrder ? Number(sortOrder) : 0,
-      isActive: isActive !== undefined ? isActive === "true" || isActive === true : true,
+      isActive: activeStatus,
       createdBy: req.admin?._id,
     });
 
@@ -77,10 +82,7 @@ const getAllShopTypes = async (req, res) => {
       filter.isActive = req.query.isActive === "true";
     }
 
-    const shopTypes = await ShopType.find(filter).sort({
-      sortOrder: 1,
-      createdAt: 1,
-    });
+    const shopTypes = await ShopType.find(filter).sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
@@ -96,13 +98,13 @@ const getAllShopTypes = async (req, res) => {
   }
 };
 
-// 3. GET Active Shop Types (User/Shopkeeper App Screen ke liye)
+// 3. GET Active Shop Types (User/App ke liye)
 // GET /api/admin/shopkeeper/shoptype/active
 const getActiveShopTypes = async (req, res) => {
   try {
     const shopTypes = await ShopType.find({ isActive: true })
-      .select("name subtitle icon sortOrder")
-      .sort({ sortOrder: 1, createdAt: 1 });
+      .select("name subtitle icon isActive")
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
@@ -152,12 +154,12 @@ const getShopTypeById = async (req, res) => {
   }
 };
 
-// 5. UPDATE Shop Type (Nayi image upload hone par purani delete ho jayegi)
+// 5. UPDATE Shop Type
 // PUT /api/admin/shopkeeper/shoptype/:id
 const updateShopType = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, subtitle, sortOrder, isActive } = req.body;
+    const { name, subtitle, isActive } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       if (req.file) deleteFileFromDisk(req.file.path);
@@ -193,14 +195,11 @@ const updateShopType = async (req, res) => {
     }
 
     if (subtitle !== undefined) shopType.subtitle = subtitle.trim();
-    if (sortOrder !== undefined) shopType.sortOrder = Number(sortOrder);
     if (isActive !== undefined) {
       shopType.isActive = isActive === "true" || isActive === true;
     }
 
-    // Agar nayi icon image aayi hai:
     if (req.file) {
-      // Purani image ko delete karein disk se
       if (shopType.icon) {
         deleteFileFromDisk(shopType.icon);
       }
@@ -224,7 +223,7 @@ const updateShopType = async (req, res) => {
   }
 };
 
-// 6. DELETE Shop Type (Disk se icon image bhi delete karega)
+// 6. DELETE Shop Type
 // DELETE /api/admin/shopkeeper/shoptype/:id
 const deleteShopType = async (req, res) => {
   try {
@@ -245,7 +244,6 @@ const deleteShopType = async (req, res) => {
       });
     }
 
-    // Disk se file delete karein
     if (shopType.icon) {
       deleteFileFromDisk(shopType.icon);
     }

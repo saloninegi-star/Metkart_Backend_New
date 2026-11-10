@@ -101,6 +101,27 @@ test("vendor profile APIs require authentication", async () => {
   }
 });
 
+test("vendor business type and shop type APIs require an admin token", async () => {
+  const app = createApp(config);
+  const routes = [
+    ["post", "/api/admin/vendor/businesstype"],
+    ["get", "/api/admin/vendor/businesstype"],
+    ["get", "/api/admin/vendor/businesstype/123"],
+    ["put", "/api/admin/vendor/businesstype/123"],
+    ["delete", "/api/admin/vendor/businesstype/123"],
+    ["post", "/api/admin/vendor/shoptype/123"],
+    ["get", "/api/admin/vendor/shoptype/by-business/123"],
+    ["get", "/api/admin/vendor/shoptype/123"],
+    ["put", "/api/admin/vendor/shoptype/123"],
+    ["delete", "/api/admin/vendor/shoptype/123"],
+  ];
+
+  for (const [method, path] of routes) {
+    const response = await request(app)[method](path).send({});
+    assert.equal(response.status, 401, `${method.toUpperCase()} ${path}`);
+  }
+});
+
 test("authorization allows and denies roles", async () => {
   const middleware = authorize("vendor");
   const allowed = await new Promise((resolve) => {

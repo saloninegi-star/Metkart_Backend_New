@@ -23,6 +23,12 @@ function errorHandler(error, req, res, next) {
   } else if (error.type === "entity.too.large") {
     statusCode = 413;
     message = "Request body is too large";
+  } else if (error.name === "MulterError") {
+    statusCode = error.code === "LIMIT_FILE_SIZE" ? 413 : 400;
+    message =
+      error.code === "LIMIT_FILE_SIZE"
+        ? "Uploaded file exceeds the 10 MB limit"
+        : error.message;
   }
 
   if (statusCode >= 500) {

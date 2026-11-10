@@ -5,8 +5,8 @@ const shopTypeSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "Shop type name is required"],
-      unique: true,
       trim: true,
+      unique: true,
     },
     subtitle: {
       type: String,
@@ -16,11 +16,6 @@ const shopTypeSchema = new mongoose.Schema(
     icon: {
       type: String,
       default: "",
-      trim: true,
-    },
-    sortOrder: {
-      type: Number,
-      default: 0,
     },
     isActive: {
       type: Boolean,
@@ -31,7 +26,9 @@ const shopTypeSchema = new mongoose.Schema(
       ref: "Admin",
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 module.exports = mongoose.model("ShopType", shopTypeSchema);

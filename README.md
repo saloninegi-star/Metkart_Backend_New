@@ -39,7 +39,7 @@ npm test
 
 ## API
 
-All API routes use the `/api/v1` prefix and JSON.
+Core user API routes use the `/api/v1` prefix and JSON. Vendor auth and onboarding routes use `/api/vendor`; onboarding request formats are documented below.
 
 | Method | Path | Access |
 |---|---|---|
@@ -55,6 +55,12 @@ All API routes use the `/api/v1` prefix and JSON.
 | `PATCH` | `/api/v1/vendor/change-password` | `vendor`; requires current and new password |
 | `GET` | `/api/v1/vendor/me` | `vendor`; legacy profile endpoint |
 | `GET` | `/api/v1/delivery/me` | `delivery_boy` |
+| `GET` | `/api/admin/vendor/productcategory` | Admin; list all product categories |
+| `POST` | `/api/admin/vendor/productcategory/:shopTypeId` | Admin; create category for a shop type with `productcategoryname` |
+| `GET` | `/api/admin/vendor/productcategory/by-shoptype/:shopTypeId` | Admin; list categories for a shop type |
+| `GET` | `/api/admin/vendor/productcategory/detail/:id` | Admin; get one category |
+| `PUT` | `/api/admin/vendor/productcategory/detail/:id` | Admin; update `productcategoryname` and/or `isActive` |
+| `DELETE` | `/api/admin/vendor/productcategory/detail/:id` | Admin; delete category |
 
 Registration example:
 
@@ -82,6 +88,32 @@ Vendor registration is provided separately from user-app registration:
 ```
 
 Vendor profile updates accept `name`, `businessName`, `phone`, and an `address` object with `street`, `city`, `state`, `postalCode`, and `country`. Change password with `{ "currentPassword": "...", "newPassword": "..." }`; existing access tokens are invalidated, so sign in again afterwards.
+
+### Vendor onboarding
+
+After email OTP verification, use the returned vendor token as `Authorization: Bearer <token>`:
+
+| Method | Path | Purpose |
+|---|---|---|
+| `PUT` | `/api/vendor/onboarding/:type` | Save or update a draft |
+| `POST` | `/api/vendor/onboarding/:type/submit` | Validate required fields and submit for review |
+| `GET` | `/api/vendor/onboarding/:type` | Get saved form, status, and private file URLs |
+| `GET` | `/api/vendor/onboarding/:type/files/:filename` | View a file belonging to the signed-in vendor |
+
+`:type` must be `shopkeeper`, `restaurant`, `mechanic`, or `scrapVendor`. Send each value as an individual key in `multipart/form-data` (not inside a `data` JSON field). Include `vendorId`; it must match the authenticated vendor token. The IDs `businessTypeId`, `shopTypeId`, and `categoryId` are also submitted individually and are required when submitting the completed profile. Shared profile fields are `ownerFullName`, `email`, `mobileNumber`, `whatsappUpdates`, `primaryContactSameAsOwner`, `primaryContactNumber`, `shopNo`, `floor`, `area`, `city`, `nearbyLandmark`, `latitude`, `longitude`, `panNumber`, `panFullName`, `gstRegistered`, `gstNumber`, `gstFullName`, `registeredBusinessAddress`, `tradeLicenseNumber`, `bankAccountNumber`, `bankAccountNumberConfirm`, `ifscCode`, and `accountType`. Send booleans as `true` or `false`, coordinates/experience as numeric strings, and array fields as JSON strings (for example `["Cafe","Bakery"]`). For backwards compatibility, the server also accepts a JSON `data` field.
+
+Role-specific JSON fields:
+
+| Type | Additional fields |
+|---|---|
+| `shopkeeper` | `shopkeeperName` |
+| `restaurant` | `restaurantName`, `cuisineTypes` (string array), `fssaiNumber` |
+| `mechanic` | `garageName`, `serviceCategories` (string array), `yearsExperience` |
+| `scrapVendor` | `businessName`, `scrapCategories` (string array), `pickupAvailable` |
+
+All types use the same file fields: `panCard`, `aadhaarCard`, `storefrontPhotos` (up to 10), `gstCertificate`, `tradeLicense`, and `bankProof`. Each file is limited to 5 MB; PDF, JPEG, PNG, and WEBP are accepted. Files are stored outside the public `/uploads` directory and can only be retrieved by their owner. Drafts may be partial; submission checks required profile, tax, bank, and document fields. Bank-account confirmation is checked but never stored.
+
+Example multipart text fields for a shopkeeper draft: `vendorId`, `businessTypeId`, `shopTypeId`, `categoryId`, `shopkeeperName`, `ownerFullName`, `email`, `mobileNumber`, `area`, and `city`. Add the remaining shared and role-specific keys as shown above; attach documents using the shared file field names.
 
 ## Structure
 
