@@ -55,6 +55,7 @@ Core user API routes use the `/api/v1` prefix and JSON. Vendor auth and onboardi
 | `PATCH` | `/api/v1/vendor/change-password` | `vendor`; requires current and new password |
 | `GET` | `/api/v1/vendor/me` | `vendor`; legacy profile endpoint |
 | `GET` | `/api/v1/delivery/me` | `delivery_boy` |
+| `POST` | `/api/user/orders` | Verified user; create an order with published product IDs |
 | `GET` | `/api/admin/vendor/productcategory` | Admin; list all product categories |
 | `POST` | `/api/admin/vendor/productcategory/:shopTypeId` | Admin; create category for a shop type with `productcategoryname` |
 | `GET` | `/api/admin/vendor/productcategory/by-shoptype/:shopTypeId` | Admin; list categories for a shop type |
@@ -73,7 +74,58 @@ Registration example:
 }
 ```
 
-Login uses `email` and `password`. Both endpoints return an access token; pass it to protected routes as `Authorization: Bearer <token>`. Public user-app registration cannot assign vendor or delivery-boy roles. Vendor signup is available only through the dedicated vendor API; delivery-boy accounts still require trusted provisioning. This starter does not include ordering, payments, dispatch, or service-specific workflows.
+Login uses `email` and `password`. Both endpoints return an access token; pass it to protected routes as `Authorization: Bearer <token>`. Public user-app registration cannot assign vendor or delivery-boy roles. Vendor signup is available only through the dedicated vendor API; delivery-boy accounts still require trusted provisioning. Order creation is available through the user orders API; payment, dispatch, and service-specific workflows are not included.
+
+### User orders
+
+Create an order with a verified user's token. The `userId` in the request must match the user ID in the token; all product IDs must refer to published products with stock available. New orders start with `pending` status.
+
+```http
+POST /api/user/orders
+Authorization: Bearer <user-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "userId": "507f1f77bcf86cd799439011",
+  "productIds": [
+    "507f1f77bcf86cd799439012",
+    "507f1f77bcf86cd799439013"
+  ]
+}
+```
+
+The creation response populates `userId` with the user's profile details and each `productIds` entry with its product details. Sensitive user fields such as OTP data are not included.
+
+```json
+{
+  "success": true,
+  "message": "Order created successfully",
+  "data": {
+    "_id": "order-id",
+    "userId": {
+      "_id": "507f1f77bcf86cd799439011",
+      "fullName": "Asha",
+      "email": "asha@example.com",
+      "mobileNumber": "+1-555-0100",
+      "currentAddress": "Example address"
+    },
+    "productIds": [
+      {
+        "_id": "507f1f77bcf86cd799439012",
+        "title": "Product name",
+        "category": "Grocery",
+        "description": "Product description",
+        "weightVolume": "1 kg",
+        "price": 10,
+        "images": []
+      }
+    ],
+    "status": "pending"
+  }
+}
+```
 
 Vendor registration is provided separately from user-app registration:
 

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Vendor = require("../../../vendor/auth/vendorAuth.model");
+const BusinessType = require("../businessType/businessType.model");
 const ProductCategory = require("../productCategory/productCategory.model");
 const ShopType = require("../shopType/shopType.model");
 
@@ -167,6 +168,13 @@ exports.setOnboardingStatus = async (req, res) => {
       });
     }
 
+    const onboardingData = vendor.onboardingData || {};
+    const businessTypeId = onboardingData.businessTypeId;
+    const businessType =
+      businessTypeId && mongoose.Types.ObjectId.isValid(businessTypeId)
+        ? await BusinessType.findById(businessTypeId).select("name")
+        : null;
+
     if (approvalAction === "approve") {
       vendor.onboardingStatus = "approved";
       vendor.status = "active";
@@ -195,6 +203,8 @@ exports.setOnboardingStatus = async (req, res) => {
         onboardingStatus: vendor.onboardingStatus,
         reason: vendor.onboardingReason ?? null,
         vendorStatus: vendor.status,
+        businessTypeId: businessTypeId ? String(businessTypeId) : null,
+        businessTypeName: businessType?.name ?? null,
       },
     });
   } catch (error) {

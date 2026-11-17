@@ -154,7 +154,9 @@ test("authenticated vendors can save a role-specific draft", async () => {
       .field("shopkeeperName", "Green Mart")
       .field("ownerFullName", "Owner Name")
       .field("area", "Kothrud")
-      .field("city", "Pune");
+      .field("city", "Pune")
+      .field("state", "Maharashtra")
+      .field("pincode", "411038");
 
     assert.equal(response.status, 200);
     assert.equal(response.body.data.status, 0);
@@ -164,6 +166,8 @@ test("authenticated vendors can save a role-specific draft", async () => {
     assert.deepEqual(response.body.data.form.location, {
       area: "Kothrud",
       city: "Pune",
+      state: "Maharashtra",
+      pincode: "411038",
     });
     assert.equal(vendor.onboardingType, "shopkeeper");
     assert.equal(vendor.onboardingStatus, "draft");
@@ -184,7 +188,12 @@ test("shopkeeper submission requires the Figma profile, tax, bank, and document 
       ownerFullName: "Owner Name",
       email: "owner@example.com",
       mobileNumber: "+91 9876543210",
-      location: { area: "Kothrud", city: "Pune" },
+      location: {
+        area: "Kothrud",
+        city: "Pune",
+        state: "Maharashtra",
+        pincode: "411038",
+      },
       panNumber: "ABCDE1234F",
       panFullName: "Owner Name",
       gstRegistered: false,

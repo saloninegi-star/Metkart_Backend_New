@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const request = require("supertest");
 const { createApp } = require("../src/app");
 const Vendor = require("../src/modules/vendor/auth/vendorAuth.model");
+const BusinessType = require("../src/modules/admin/vendor/businessType/businessType.model");
 const ProductCategory = require("../src/modules/admin/vendor/productCategory/productCategory.model");
 const ShopType = require("../src/modules/admin/vendor/shopType/shopType.model");
 const {
@@ -26,10 +27,16 @@ test("admin onboarding endpoints require an admin token", async () => {
 
 test("admin can approve, reject, or block an onboarding", async () => {
   const originalFindById = Vendor.findById;
+  const originalBusinessTypeFindById = BusinessType.findById;
   const vendorId = "507f1f77bcf86cd799439011";
+  const businessTypeId = "507f1f77bcf86cd799439014";
   const vendor = {
     _id: vendorId,
     onboardingType: "restaurant",
+    onboardingData: {
+      restaurantName: "Garden Bistro",
+      businessTypeId,
+    },
     onboardingStatus: "submitted",
     status: "active",
     async save() {},
@@ -37,6 +44,15 @@ test("admin can approve, reject, or block an onboarding", async () => {
   Vendor.findById = async (id) => {
     assert.equal(id, vendorId);
     return vendor;
+  };
+  BusinessType.findById = (id) => {
+    assert.equal(String(id), businessTypeId);
+    return {
+      select: async (fields) => {
+        assert.equal(fields, "name");
+        return { name: "Food & Beverage" };
+      },
+    };
   };
 
   const responseFor = (action, reason) => {
@@ -68,6 +84,9 @@ test("admin can approve, reject, or block an onboarding", async () => {
     assert.equal(accepted.res.body.data.status, 1);
     assert.equal(vendor.onboardingStatus, "approved");
     assert.equal(vendor.status, "active");
+    assert.equal(Object.hasOwn(accepted.res.body.data, "vendorName"), false);
+    assert.equal(accepted.res.body.data.businessTypeId, businessTypeId);
+    assert.equal(accepted.res.body.data.businessTypeName, "Food & Beverage");
 
     const rejected = responseFor("reject", "Invalid business documents");
     await rejected.promise;
@@ -92,6 +111,7 @@ test("admin can approve, reject, or block an onboarding", async () => {
     assert.equal(vendor.onboardingStatus, "blocked");
   } finally {
     Vendor.findById = originalFindById;
+    BusinessType.findById = originalBusinessTypeFindById;
   }
 });
 

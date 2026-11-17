@@ -1,0 +1,302 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 5218 >>
+stream
+BT
+/F1 16 Tf
+1 0 0 1 46 755 Tm (METKART | ADMIN + VENDOR API COLLECTION) Tj
+/F1 8.5 Tf
+1 0 0 1 46 738 Tm (Postman Collection Guide | 16 November 2026) Tj
+/F1 8.5 Tf
+1 0 0 1 46 726 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 714 Tm (IMPORT) Tj
+/F1 8.5 Tf
+1 0 0 1 46 697 Tm (Import Metkart_Admin_Vendor.postman_collection.json in Postman. Set baseUrl to your API host.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 685 Tm (Local default: http://localhost:3000. Auth requests save adminToken/vendorToken automatically.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 673 Tm (Use the appropriate Bearer token for protected endpoints. Replace all {{...}} IDs with real) Tj
+/F1 8.5 Tf
+1 0 0 1 46 661 Tm (IDs.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 649 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 637 Tm (AUTH AND REQUEST NOTES) Tj
+/F1 8.5 Tf
+1 0 0 1 46 620 Tm (Admin: register or login at /api/admin/auth/*; the returned token is saved as adminToken.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 608 Tm (Vendor: send OTP, then verify OTP; token is saved as vendorToken. Dev OTP currently returns) Tj
+/F1 11 Tf
+1 0 0 1 46 596 Tm (123456.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 579 Tm (JSON requests use application/json. Icon, onboarding and product image uploads use form-data.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 567 Tm (Vendor onboarding types: shopkeeper, restaurant, mechanic, scrapVendor.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 555 Tm (Onboarding file keys: panCard, aadhaarCard, storefrontPhotos \(up to 10\), gstCertificate,) Tj
+/F1 8.5 Tf
+1 0 0 1 46 543 Tm (tradeLicense, bankProof. Files: PDF/JPEG/PNG/WEBP; max 5 MB each.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 531 Tm (Product form fields: title, category, description, weightVolume, price, availableQuantity,) Tj
+/F1 8.5 Tf
+1 0 0 1 46 519 Tm (optional expiryDate/status. Product images use repeated images fields \(JPEG/PNG/WEBP, max 10\).) Tj
+/F1 8.5 Tf
+1 0 0 1 46 507 Tm (Publishing a product requires at least 3 images. Onboarding submit validates required) Tj
+/F1 8.5 Tf
+1 0 0 1 46 495 Tm (fields/files.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 483 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 471 Tm (ADMIN - AUTHENTICATION) Tj
+/F1 8.5 Tf
+1 0 0 1 46 454 Tm (POST http://localhost:3000/api/admin/auth/register [PUBLIC]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 442 Tm (Creates an admin account. Save the returned token as adminToken.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 430 Tm (POST http://localhost:3000/api/admin/auth/login [PUBLIC]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 418 Tm (Returns a Bearer token and saves it as adminToken.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 406 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 394 Tm (ADMIN - SHOPKEEPER SHOP TYPES) Tj
+/F1 8.5 Tf
+1 0 0 1 46 377 Tm (GET http://localhost:3000/api/admin/shopkeeper/shoptype/active [PUBLIC]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 365 Tm (POST http://localhost:3000/api/admin/shopkeeper/shoptype [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 353 Tm (Admin Bearer token required. multipart/form-data; icon is a file.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 341 Tm (GET http://localhost:3000/api/admin/shopkeeper/shoptype [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 329 Tm (GET http://localhost:3000/api/admin/shopkeeper/shoptype/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 317 Tm (PUT http://localhost:3000/api/admin/shopkeeper/shoptype/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 305 Tm (Admin Bearer token required. multipart/form-data; icon is optional.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 293 Tm (DELETE http://localhost:3000/api/admin/shopkeeper/shoptype/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 281 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 269 Tm (ADMIN - SHOPKEEPER CATEGORIES) Tj
+/F1 8.5 Tf
+1 0 0 1 46 252 Tm (GET http://localhost:3000/api/admin/shopkeeper/shopcategory [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 240 Tm (POST http://localhost:3000/api/admin/shopkeeper/shopcategory/{{shopTypeId}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 228 Tm (Admin Bearer token required.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 216 Tm (GET http://localhost:3000/api/admin/shopkeeper/shopcategory/{{shopTypeId}} [PUBLIC]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 204 Tm (GET http://localhost:3000/api/admin/shopkeeper/shopcategory/detail/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 192 Tm (PUT http://localhost:3000/api/admin/shopkeeper/shopcategory/detail/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 180 Tm (DELETE http://localhost:3000/api/admin/shopkeeper/shopcategory/detail/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 168 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 156 Tm (ADMIN - VENDOR BUSINESS TYPES) Tj
+/F1 8.5 Tf
+1 0 0 1 46 139 Tm (POST http://localhost:3000/api/admin/vendor/businesstype [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 127 Tm (Admin Bearer token required. multipart/form-data; icon is required.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 115 Tm (GET http://localhost:3000/api/admin/vendor/businesstype [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 103 Tm (GET http://localhost:3000/api/admin/vendor/businesstype/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 91 Tm (PUT http://localhost:3000/api/admin/vendor/businesstype/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 79 Tm (Admin Bearer token required. multipart/form-data; icon is optional.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 67 Tm (DELETE http://localhost:3000/api/admin/vendor/businesstype/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 55 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 43 Tm (ADMIN - VENDOR SHOP TYPES) Tj
+/F1 8.5 Tf
+1 0 0 1 46 26 Tm (POST http://localhost:3000/api/admin/vendor/shoptype/{{businessTypeId}} [ADMIN]) Tj
+ET
+BT /F1 8 Tf 1 0 0 1 500 24 Tm (Page 1 of 3) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 5327 >>
+stream
+BT
+/F1 8.5 Tf
+1 0 0 1 46 755 Tm (Admin Bearer token required. multipart/form-data; icon is optional.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 743 Tm (GET http://localhost:3000/api/admin/vendor/shoptype/by-business/{{businessTypeId}} [PUBLIC]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 731 Tm (GET http://localhost:3000/api/admin/vendor/shoptype/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 719 Tm (PUT http://localhost:3000/api/admin/vendor/shoptype/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 707 Tm (Admin Bearer token required. multipart/form-data; icon is optional.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 695 Tm (DELETE http://localhost:3000/api/admin/vendor/shoptype/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 683 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 671 Tm (ADMIN - VENDOR PRODUCT CATEGORIES) Tj
+/F1 8.5 Tf
+1 0 0 1 46 654 Tm (GET http://localhost:3000/api/admin/vendor/productcategory [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 642 Tm (GET http://localhost:3000/api/admin/vendor/productcategory/by-shoptype/{{shopTypeId}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 630 Tm (POST http://localhost:3000/api/admin/vendor/productcategory/{{shopTypeId}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 618 Tm (GET http://localhost:3000/api/admin/vendor/productcategory/detail/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 606 Tm (PUT http://localhost:3000/api/admin/vendor/productcategory/detail/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 594 Tm (DELETE http://localhost:3000/api/admin/vendor/productcategory/detail/{{id}} [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 582 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 570 Tm (ADMIN - VENDOR ONBOARDING REVIEW) Tj
+/F1 8.5 Tf
+1 0 0 1 46 553 Tm (GET http://localhost:3000/api/admin/vendor/onboarding [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 541 Tm (PATCH http://localhost:3000/api/admin/vendor/onboarding/{{vendorId}}/status [ADMIN]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 529 Tm (Use action=reject or action=block with a non-empty reason when declining or blocking.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 517 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 505 Tm (VENDOR - OTP AUTHENTICATION) Tj
+/F1 8.5 Tf
+1 0 0 1 46 488 Tm (POST http://localhost:3000/api/vendor/auth/send-otp [PUBLIC]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 476 Tm (Sends an OTP. Development builds currently return dummyOtp=123456 in the response.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 464 Tm (POST http://localhost:3000/api/vendor/auth/resend-otp [PUBLIC]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 452 Tm (Same handler as Send OTP.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 440 Tm (POST http://localhost:3000/api/vendor/auth/verify-otp [PUBLIC]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 428 Tm (Returns a vendor token and saves it as vendorToken.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 416 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 404 Tm (VENDOR - DASHBOARD AND PROFILE) Tj
+/F1 8.5 Tf
+1 0 0 1 46 387 Tm (GET http://localhost:3000/api/vendor/dashboard [VENDOR]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 375 Tm (GET http://localhost:3000/api/vendor/profile [VENDOR]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 363 Tm (PATCH http://localhost:3000/api/vendor/profile [VENDOR]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 351 Tm (Fields depend on onboarding type. Supported fields include ownerFullName, mobileNumber,) Tj
+/F1 8.5 Tf
+1 0 0 1 46 339 Tm (location and the type-specific business name.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 327 Tm (DELETE http://localhost:3000/api/vendor/profile [VENDOR]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 315 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 303 Tm (VENDOR - ONBOARDING) Tj
+/F1 8.5 Tf
+1 0 0 1 46 286 Tm (GET http://localhost:3000/api/vendor/onboarding/{{onboardingType}} [VENDOR]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 274 Tm (onboardingType: shopkeeper, restaurant, mechanic, or scrapVendor.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 262 Tm (GET http://localhost:3000/api/vendor/onboarding/{{onboardingType}}/files/{{filename}} [VENDOR]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 250 Tm (PUT http://localhost:3000/api/vendor/onboarding/{{onboardingType}} [VENDOR]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 238 Tm (multipart/form-data. Draft can be partial. Example fields are for shopkeeper; use only the) Tj
+/F1 8.5 Tf
+1 0 0 1 46 226 Tm (matching type-specific fields for other types.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 214 Tm (POST http://localhost:3000/api/vendor/onboarding/{{onboardingType}}/submit [VENDOR]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 202 Tm (Submit requires complete form data and required files. Other valid types: restaurant,) Tj
+/F1 8.5 Tf
+1 0 0 1 46 190 Tm (mechanic, scrapVendor.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 178 Tm () Tj
+/F1 11 Tf
+1 0 0 1 46 166 Tm (VENDOR - PRODUCTS) Tj
+/F1 8.5 Tf
+1 0 0 1 46 149 Tm (GET http://localhost:3000/api/vendor/products [PUBLIC]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 137 Tm (POST http://localhost:3000/api/vendor/products [VENDOR]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 125 Tm (multipart/form-data. Fields: title, category, description, weightVolume, price,) Tj
+/F1 8.5 Tf
+1 0 0 1 46 113 Tm (availableQuantity, optional expiryDate and status. Up to 10 JPEG/PNG/WEBP images; published) Tj
+/F1 8.5 Tf
+1 0 0 1 46 101 Tm (products need at least 3.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 89 Tm (GET http://localhost:3000/api/vendor/products/{{productId}}/images/{{filename}} [PUBLIC]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 77 Tm (PUT http://localhost:3000/api/vendor/products/{{productId}} [VENDOR]) Tj
+/F1 8.5 Tf
+1 0 0 1 46 65 Tm (multipart/form-data. All fields are optional for update; upload images to replace the current) Tj
+/F1 8.5 Tf
+1 0 0 1 46 53 Tm (set.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 41 Tm (DELETE http://localhost:3000/api/vendor/products/{{productId}} [VENDOR]) Tj
+ET
+BT /F1 8 Tf 1 0 0 1 500 24 Tm (Page 2 of 3) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 462 >>
+stream
+BT
+/F1 8.5 Tf
+1 0 0 1 46 755 Tm () Tj
+/F1 8.5 Tf
+1 0 0 1 46 743 Tm (ACCESS LABELS: PUBLIC routes need no token. ADMIN and VENDOR routes require their matching) Tj
+/F1 8.5 Tf
+1 0 0 1 46 731 Tm (Bearer token.) Tj
+/F1 8.5 Tf
+1 0 0 1 46 719 Tm (Note: Collection reflects the routes mounted in the current backend app; verify environment) Tj
+/F1 8.5 Tf
+1 0 0 1 46 707 Tm (and permissions before production use.) Tj
+ET
+BT /F1 8 Tf 1 0 0 1 500 24 Tm (Page 3 of 3) Tj ET
+endstream
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000127 00000 n 
+0000000197 00000 n 
+0000000323 00000 n 
+0000005593 00000 n 
+0000005719 00000 n 
+0000011098 00000 n 
+0000011224 00000 n 
+trailer
+<< /Size 10 /Root 1 0 R >>
+startxref
+11737
+%%EOF

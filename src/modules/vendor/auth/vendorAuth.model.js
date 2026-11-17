@@ -73,6 +73,10 @@ const vendorSchema = new mongoose.Schema(
       default: null,
       trim: true,
     },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
     status: {
       type: String,
       enum: ['pending', 'active', 'blocked'],

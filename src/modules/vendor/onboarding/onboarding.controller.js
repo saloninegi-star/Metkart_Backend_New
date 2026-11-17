@@ -58,6 +58,8 @@ function parseData(body) {
     "floor",
     "area",
     "city",
+    "state",
+    "pincode",
     "nearbyLandmark",
     "latitude",
     "longitude",

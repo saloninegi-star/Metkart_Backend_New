@@ -27,6 +27,13 @@ exports.sendOtp = async (req, res) => {
     // Vendor dhundein ya naya create karein (Sign in / Register ek hi flow hai)
     let vendor = await Vendor.findOne({ email: normalizedEmail });
 
+    if (vendor?.deletedAt) {
+      return res.status(403).json({
+        success: false,
+        message: 'Vendor profile has been deleted.',
+      });
+    }
+
     if (!vendor) {
       vendor = new Vendor({
         email: normalizedEmail,
@@ -81,6 +88,12 @@ exports.verifyOtp = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Vendor not found. Please request a new OTP.',
+      });
+    }
+    if (vendor.deletedAt) {
+      return res.status(403).json({
+        success: false,
+        message: 'Vendor profile has been deleted.',
       });
     }
 

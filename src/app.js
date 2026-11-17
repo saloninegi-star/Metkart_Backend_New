@@ -26,7 +26,16 @@ const onboardingApprovalRoutes = require("./modules/admin/vendor/onboarding/onbo
 // Vendor Auth Routes (Send OTP / Verify OTP)
 // ==========================================
 const vendorAuthRoutes = require("./modules/vendor/auth/vendorAuth.routes");
+const vendorDashboardRoutes = require("./modules/vendor/dashboard/dashboard.routes");
 const vendorOnboardingRoutes = require("./modules/vendor/onboarding/onboarding.routes");
+const vendorProductRoutes = require("./modules/vendor/products/products.routes");
+const vendorProfileRoutes = require("./modules/vendor/profile/profile.routes");
+
+// ==========================================
+// User Auth Routes (Register / Login / Verify OTP)
+// ==========================================
+const userAuthRoutes = require("./modules/user/auth/userAuth.router");
+const createOrderRoutes = require("./modules/user/orders/orders.routes");
 
 function createApp(config) {
   const app = express();
@@ -60,7 +69,16 @@ function createApp(config) {
   // Vendor Authentication Routes Mounted Here
   // ==========================================
   app.use("/api/vendor/auth", vendorAuthRoutes);
+  app.use("/api/vendor/dashboard", vendorDashboardRoutes);
   app.use("/api/vendor/onboarding", vendorOnboardingRoutes);
+  app.use("/api/vendor/products", vendorProductRoutes);
+  app.use("/api/vendor/profile", vendorProfileRoutes);
+
+  // ==========================================
+  // User Authentication Routes Mounted Here
+  // ==========================================
+  app.use("/api/user/auth", userAuthRoutes);
+  app.use("/api/user/orders", createOrderRoutes(config));
 
   app.get(
     "/api/v1/user-app/me",

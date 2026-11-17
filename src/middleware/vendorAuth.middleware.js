@@ -27,6 +27,9 @@ function authenticateVendor(jwtSecret = process.env.JWT_SECRET || "your_metkart_
     }
 
     const vendor = await Vendor.findById(payload.id);
+    if (vendor?.deletedAt) {
+      throw new ApiError(403, "Vendor profile has been deleted");
+    }
     if (!vendor || !vendor.isEmailVerified) {
       throw new ApiError(401, "Verified vendor account not found");
     }
