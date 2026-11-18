@@ -56,6 +56,9 @@ Core user API routes use the `/api/v1` prefix and JSON. Vendor auth and onboardi
 | `GET` | `/api/v1/vendor/me` | `vendor`; legacy profile endpoint |
 | `GET` | `/api/v1/delivery/me` | `delivery_boy` |
 | `POST` | `/api/user/orders` | Verified user; create an order with published product IDs |
+| `GET` | `/api/user/orders/:userId` | Verified user; get all orders by user ID in URL params |
+| `GET` | `/api/user/orders/vendor/:vendorId` | Public / Vendor; get all orders by vendor ID in URL params |
+| `GET` | `/api/user/orders/all` | Admin; get all orders across the platform (supports pagination) |
 | `GET` | `/api/admin/vendor/productcategory` | Admin; list all product categories |
 | `POST` | `/api/admin/vendor/productcategory/:shopTypeId` | Admin; create category for a shop type with `productcategoryname` |
 | `GET` | `/api/admin/vendor/productcategory/by-shoptype/:shopTypeId` | Admin; list categories for a shop type |

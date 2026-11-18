@@ -147,12 +147,12 @@ const userAuthFolder = {
   ]
 };
 
-// 3. User App - Orders
+// 3. Orders Folder (All Order Routes Consolidated)
 const userOrdersFolder = {
-  name: 'User App - Orders',
+  name: 'Orders',
   item: [
     makeRequest({
-      name: 'Create Order',
+      name: '1. Create Order',
       method: 'POST',
       pathSegments: ['api', 'user', 'orders'],
       auth: {
@@ -175,6 +175,34 @@ const userOrdersFolder = {
         'const body = pm.response.json();',
         'if (body.data && body.data._id) pm.environment.set("orderId", body.data._id);'
       ]
+    }),
+    makeRequest({
+      name: '2. Get Orders by User ID',
+      method: 'GET',
+      pathSegments: ['api', 'user', 'orders', '{{userId}}'],
+      auth: {
+        type: 'noauth'
+      },
+      description: 'Retrieves all orders placed by the user using userId in URL params. Does NOT require authentication.'
+    }),
+    makeRequest({
+      name: '3. Get Orders by Vendor ID',
+      method: 'GET',
+      pathSegments: ['api', 'user', 'orders', 'vendor', '{{vendorId}}'],
+      auth: {
+        type: 'noauth'
+      },
+      description: 'Retrieves all orders containing products belonging to the specified vendorId. Does NOT require admin token.'
+    }),
+    makeRequest({
+      name: '4. Get All Orders (Admin)',
+      method: 'GET',
+      pathSegments: ['api', 'user', 'orders', 'all'],
+      auth: {
+        type: 'bearer',
+        bearer: [{ key: 'token', value: '{{adminToken}}', type: 'string' }]
+      },
+      description: 'Retrieves all platform orders with optional pagination (page, limit) and status filtering. Requires Admin Bearer token.'
     })
   ]
 };

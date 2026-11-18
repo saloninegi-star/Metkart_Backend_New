@@ -33,7 +33,12 @@ function errorHandler(error, req, res, next) {
 
   if (statusCode >= 500) {
     console.error(error);
-    message = "Internal server error";
+    if (process.env.NODE_ENV !== "production") {
+      message = error.message || "Internal server error";
+      details = details || error.stack;
+    } else {
+      message = "Internal server error";
+    }
   }
 
   return res.status(statusCode).json({

@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "f81325c9-b321-4001-80c4-30624f7ab538",
+    "_postman_id": "216754ea-3df9-4ce3-9c95-28e0e9cfb395",
     "name": "Metkart Complete API Collection",
     "description": "Complete, fully-featured Postman collection for all Metkart backend endpoints: Health, User App (OTP Auth & Orders), Admin (Auth, Shopkeeper, Vendor Settings, Onboarding Approvals), Vendor (OTP Auth, Dashboard, Profile, Onboarding, Products), and Platform v1 APIs.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -268,10 +268,10 @@
       ]
     },
     {
-      "name": "User App - Orders",
+      "name": "Orders",
       "item": [
         {
-          "name": "Create Order",
+          "name": "1. Create Order",
           "request": {
             "method": "POST",
             "auth": {
@@ -325,6 +325,86 @@
               }
             }
           ]
+        },
+        {
+          "name": "2. Get Orders by User ID",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/orders/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "orders",
+                "{{userId}}"
+              ]
+            },
+            "description": "Retrieves all orders placed by the user using userId in URL params. Does NOT require authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Orders by Vendor ID",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/orders/vendor/{{vendorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "orders",
+                "vendor",
+                "{{vendorId}}"
+              ]
+            },
+            "description": "Retrieves all orders containing products belonging to the specified vendorId. Does NOT require admin token."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get All Orders (Admin)",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/orders/all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "orders",
+                "all"
+              ]
+            },
+            "description": "Retrieves all platform orders with optional pagination (page, limit) and status filtering. Requires Admin Bearer token."
+          },
+          "response": []
         }
       ]
     },

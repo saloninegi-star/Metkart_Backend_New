@@ -53,4 +53,118 @@ const createOrder = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { createOrder };
+const getOrdersByUserId = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new ApiError(400, "A valid userId is required");
+  }
+
+  const orders = await Order.find({ userId })
+    .sort({ createdAt: -1 })
+    .populate([
+      { path: "userId", select: "fullName email mobileNumber currentAddress" },
+      {
+        path: "productIds",
+        select: "title category description weightVolume price images vendorId",
+      },
+    ]);
+
+  return res.status(200).json({
+    success: true,
+    count: orders.length,
+    data: orders,
+  });
+});
+
+const getAllOrders = asyncHandler(async (req, res) => {
+  const { page, limit, status } = req.query;
+
+  const query = {};
+  if (status) {
+    query.status = status;
+  }
+
+  const queryBuilder = Order.find(query)
+    .sort({ createdAt: -1 })
+    .populate([
+      { path: "userId", select: "fullName email mobileNumber currentAddress" },
+      {
+        path: "productIds",
+        select: "title category description weightVolume price images vendorId",
+      },
+    ]);
+
+  if (page && limit) {
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.max(1, Math.min(100, parseInt(limit, 10) || 10));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [total, orders] = await Promise.all([
+      Order.countDocuments(query),
+      queryBuilder.skip(skip).limit(limitNum),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      count: orders.length,
+      total,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum) || 1,
+      },
+      data: orders,
+    });
+  }
+
+  const orders = await queryBuilder;
+
+  return res.status(200).json({
+    success: true,
+    count: orders.length,
+    data: orders,
+  });
+});
+
+const getOrdersByVendorId = asyncHandler(async (req, res) => {
+  const vendorId = req.params.vendorId || req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(vendorId)) {
+    throw new ApiError(400, "A valid vendorId is required");
+  }
+
+  const vendorProducts = await Product.find({ vendorId }).select("_id");
+  const productIds = vendorProducts.map((p) => p._id);
+
+  if (productIds.length === 0) {
+    return res.status(200).json({
+      success: true,
+      count: 0,
+      data: [],
+    });
+  }
+
+  const orders = await Order.find({ productIds: { $in: productIds } })
+    .sort({ createdAt: -1 })
+    .populate([
+      { path: "userId", select: "fullName email mobileNumber currentAddress" },
+      {
+        path: "productIds",
+        select: "title category description weightVolume price images vendorId",
+      },
+    ]);
+
+  return res.status(200).json({
+    success: true,
+    count: orders.length,
+    data: orders,
+  });
+});
+
+module.exports = {
+  createOrder,
+  getOrdersByUserId,
+  getAllOrders,
+  getOrdersByVendorId,
+};
