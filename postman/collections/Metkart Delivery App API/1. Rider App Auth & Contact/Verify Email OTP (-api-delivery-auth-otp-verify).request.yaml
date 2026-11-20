@@ -1,0 +1,16 @@
+$kind: http-request
+name: Verify Email OTP (/api/delivery/auth/otp/verify)
+description: Verifies 6-digit email OTP and issues rider access and refresh JWTs. Also accessible via `POST {{baseUrl}}/api/rider/auth/otp/verify`.
+url: "{{baseUrl}}/api/delivery/auth/otp/verify"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "lavi@pearlorganisation.com",
+      "otp": "723968"
+    }
+examples: .resources/Verify Email OTP (-api-delivery-auth-otp-verify).resources/examples
+order: 2000

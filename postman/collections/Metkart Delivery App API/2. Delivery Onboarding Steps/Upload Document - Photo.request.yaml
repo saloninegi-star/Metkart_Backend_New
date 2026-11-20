@@ -1,0 +1,26 @@
+$kind: http-request
+name: Upload Document / Photo
+url: "{{baseUrl}}/api/delivery/uploads"
+method: POST
+headers:
+  Authorization: Bearer {{riderToken}}
+  Idempotency-Key: "{{$guid}}"
+body:
+  type: formdata
+  content:
+    - type: text
+      key: purpose
+      value: PASSBOOK
+      disabled: false
+    - type: file
+      key: file
+      src:
+        - /C:/Users/Pearl-Admin/Downloads/Fluffy Golden Pet Resting on Luxury Velvet Donut Bed in Sunlit Living Room (1).png
+      disabled: false
+    - type: file
+      key: ""
+      src: []
+      description: ""
+      disabled: false
+examples: .resources/Upload Document - Photo.resources/examples
+order: 7000

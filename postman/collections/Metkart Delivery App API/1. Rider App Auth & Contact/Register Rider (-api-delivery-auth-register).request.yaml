@@ -1,0 +1,19 @@
+$kind: http-request
+name: Register Rider (/api/delivery/auth/register)
+description: Dedicated Rider registration endpoint. Also accessible via `POST {{baseUrl}}/api/rider/auth/register`.
+url: http://localhost:3001/api/delivery/auth/register
+method: POST
+headers:
+  Content-Type: application/json
+  Idempotency-Key: "{{$guid}}"
+body:
+  type: text
+  content: |-
+    {
+      "email": "lavi@pearlorganisation.com",
+      "password": "Password123",
+      "role": "RIDER",
+      "phone": "9876543210"
+    }
+examples: .resources/Register Rider (-api-delivery-auth-register).resources/examples
+order: 1000

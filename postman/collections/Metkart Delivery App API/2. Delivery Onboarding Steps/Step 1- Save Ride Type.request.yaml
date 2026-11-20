@@ -1,0 +1,15 @@
+$kind: http-request
+name: "Step 1: Save Ride Type"
+url: "{{baseUrl}}/api/delivery/onboarding/ride-type"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{riderToken}}
+body:
+  type: text
+  content: |-
+    {
+      "rideType": "TWO_WHEELER"
+    }
+examples: .resources/Step 1- Save Ride Type.resources/examples
+order: 3000

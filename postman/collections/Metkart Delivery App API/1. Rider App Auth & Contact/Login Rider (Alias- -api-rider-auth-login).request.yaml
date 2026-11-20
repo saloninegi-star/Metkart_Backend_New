@@ -1,0 +1,15 @@
+$kind: http-request
+name: "Login Rider (Alias: /api/rider/auth/login)"
+description: Direct Rider alias login endpoint.
+url: "{{baseUrl}}/api/rider/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "rider@example.com",
+      "password": "Password123"
+    }
+order: 8000

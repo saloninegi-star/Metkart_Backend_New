@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{baseUrl}}/api/delivery/uploads/{{fileId}}"
+method: DELETE
+headers:
+  Authorization: Bearer {{riderToken}}
+examples: .resources/Delete Uploaded File.resources/examples
+order: 8000

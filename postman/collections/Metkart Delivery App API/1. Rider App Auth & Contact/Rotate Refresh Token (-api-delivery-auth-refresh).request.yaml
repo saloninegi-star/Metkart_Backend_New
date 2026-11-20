@@ -1,0 +1,15 @@
+$kind: http-request
+name: Rotate Refresh Token (/api/delivery/auth/refresh)
+description: Rotates rider refresh token and returns new access token. Also accessible via `POST {{baseUrl}}/api/rider/auth/refresh`.
+url: "{{baseUrl}}/api/delivery/auth/refresh"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "refreshToken": "{{refreshToken}}"
+    }
+examples: .resources/Rotate Refresh Token (-api-delivery-auth-refresh).resources/examples
+order: 5000

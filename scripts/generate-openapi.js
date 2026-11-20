@@ -1,0 +1,776 @@
+const fs = require("fs");
+const path = require("path");
+const YAML = require("yaml");
+
+const openApiDocument = {
+  openapi: "3.0.3",
+  info: {
+    title: "Metkart Rider Onboarding API",
+    version: "1.1.0",
+    description: "API for Rider/Delivery Partner onboarding for two-wheeler and heavy-vehicle riders.",
+  },
+  servers: [
+    {
+      url: "http://localhost:3000/api/v1",
+      description: "Local development server (v1 prefix)",
+    },
+    {
+      url: "http://localhost:3000/api/delivery",
+      description: "Dedicated Delivery Boy / Rider App base URL",
+    },
+  ],
+  paths: {
+    "/auth/register": {
+      post: {
+        summary: "Step 1: Rider Registration",
+        description: "Creates user and profile in IN_PROGRESS state and sends OTP.",
+        tags: ["Auth"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["email", "password", "role"],
+                properties: {
+                  email: { type: "string", format: "email" },
+                  password: { type: "string", minLength: 6, maxLength: 72 },
+                  role: { type: "string", enum: ["RIDER"] },
+                  phone: { type: "string", pattern: "^[6-9][0-9]{9}$" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          201: { description: "User registered; OTP sent." },
+          200: { description: "Unverified email exists; OTP resent." },
+          409: { description: "Email already registered." },
+          422: { description: "Validation error." },
+        },
+      },
+    },
+    "/auth/otp/verify": {
+      post: {
+        summary: "Verify Email OTP",
+        tags: ["Auth"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["email", "otp"],
+                properties: {
+                  email: { type: "string", format: "email" },
+                  otp: { type: "string", pattern: "^\\d{6}$" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Email verified, tokens returned." },
+          422: { description: "Invalid or expired OTP." },
+          429: { description: "OTP attempts exceeded." },
+        },
+      },
+    },
+    "/auth/otp/resend": {
+      post: {
+        summary: "Resend Email OTP",
+        tags: ["Auth"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["email"],
+                properties: {
+                  email: { type: "string", format: "email" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "OTP resent successfully." },
+          429: { description: "Rate limited / cooldown active." },
+        },
+      },
+    },
+    "/auth/login": {
+      post: {
+        summary: "Rider Login",
+        tags: ["Auth"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["email", "password"],
+                properties: {
+                  email: { type: "string", format: "email" },
+                  password: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Login successful, tokens returned." },
+          401: { description: "Invalid email or password." },
+          403: { description: "Email not verified." },
+        },
+      },
+    },
+    "/auth/refresh": {
+      post: {
+        summary: "Rotate Refresh Token",
+        tags: ["Auth"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["refreshToken"],
+                properties: {
+                  refreshToken: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Tokens rotated." },
+          401: { description: "Invalid or reused refresh token." },
+        },
+      },
+    },
+    "/rider/onboarding": {
+      get: {
+        summary: "Get Onboarding Summary",
+        security: [{ BearerAuth: [] }],
+        tags: ["Onboarding"],
+        responses: {
+          200: { description: "Full onboarding state with sensitive data masked." },
+          401: { description: "Unauthenticated." },
+        },
+      },
+    },
+    "/rider/onboarding/status": {
+      get: {
+        summary: "Get Onboarding Status",
+        security: [{ BearerAuth: [] }],
+        tags: ["Onboarding"],
+        responses: {
+          200: { description: "Current status, reference number, and redo steps." },
+        },
+      },
+    },
+    "/rider/onboarding/contact": {
+      patch: {
+        summary: "Update Rider Contact Phone",
+        security: [{ BearerAuth: [] }],
+        tags: ["Onboarding"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["phone"],
+                properties: {
+                  phone: { type: "string", pattern: "^[6-9][0-9]{9}$" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Contact phone updated." },
+          409: { description: "Phone already used by another rider." },
+        },
+      },
+    },
+    "/rider/onboarding/ride-type": {
+      put: {
+        summary: "Step 1: Set Ride Type",
+        security: [{ BearerAuth: [] }],
+        tags: ["Onboarding"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["rideType"],
+                properties: {
+                  rideType: { type: "string", enum: ["TWO_WHEELER", "HEAVY_VEHICLE", "COURIER"] },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Ride type updated." },
+          409: { description: "Locked for review or invalid state." },
+          422: { description: "Courier not supported." },
+        },
+      },
+    },
+    "/rider/onboarding/preference": {
+      put: {
+        summary: "Step 2: Set Delivery Preference",
+        security: [{ BearerAuth: [] }],
+        tags: ["Onboarding"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["deliveryPreference"],
+                properties: {
+                  deliveryPreference: {
+                    type: "string",
+                    enum: [
+                      "FOOD_DELIVERY",
+                      "GROCERY_DELIVERY",
+                      "BOTH_DELIVERIES",
+                      "HEAVY_DELIVERY",
+                      "SCRAP_PICKER",
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Preference updated." },
+          409: { description: "Step out of order." },
+          422: { description: "Invalid preference for ride type." },
+        },
+      },
+    },
+    "/zones": {
+      get: {
+        summary: "List Active Operating Zones",
+        tags: ["Zones"],
+        parameters: [
+          { name: "q", in: "query", schema: { type: "string" } },
+          { name: "lat", in: "query", schema: { type: "number" } },
+          { name: "lng", in: "query", schema: { type: "number" } },
+          { name: "limit", in: "query", schema: { type: "integer", default: 20 } },
+        ],
+        responses: {
+          200: { description: "Active zones list." },
+        },
+      },
+    },
+    "/rider/onboarding/work-area": {
+      put: {
+        summary: "Step 3: Set Work Area and Vehicle Type",
+        security: [{ BearerAuth: [] }],
+        tags: ["Onboarding"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["zoneId", "vehicleType"],
+                properties: {
+                  zoneId: { type: "string" },
+                  vehicleType: {
+                    type: "string",
+                    enum: [
+                      "MOTORCYCLE",
+                      "EV",
+                      "CYCLE",
+                      "CARGO_3W",
+                      "ELECTRIC_CARGO",
+                      "COMMERCIAL_4W",
+                      "HEAVY_FREIGHT",
+                    ],
+                  },
+                  vehicleOwnership: {
+                    type: "string",
+                    enum: ["SELF_OWNED", "RENTED_LEASED", "FLEET_COMPANY"],
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Work area updated." },
+          404: { description: "Zone not found." },
+          409: { description: "Step out of order." },
+          422: { description: "Validation error on ownership or vehicle type." },
+        },
+      },
+    },
+    "/uploads": {
+      post: {
+        summary: "Upload Document / Photo",
+        security: [{ BearerAuth: [] }],
+        tags: ["Uploads"],
+        requestBody: {
+          required: true,
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                required: ["purpose", "file"],
+                properties: {
+                  purpose: {
+                    type: "string",
+                    enum: [
+                      "DL",
+                      "RC",
+                      "INSURANCE",
+                      "FITNESS_CERT",
+                      "PERMIT",
+                      "PUC",
+                      "EV_PURCHASE_BILL",
+                      "ID_PROOF",
+                      "CYCLE_PHOTO",
+                      "AADHAAR_DOC",
+                      "PAN_DOC",
+                      "SELFIE",
+                      "PASSBOOK",
+                    ],
+                  },
+                  file: { type: "string", format: "binary" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          201: { description: "File uploaded successfully." },
+          413: { description: "File too large (> 5 MB)." },
+          415: { description: "File type not allowed." },
+        },
+      },
+    },
+    "/uploads/{fileId}": {
+      delete: {
+        summary: "Delete Unreferenced Uploaded File",
+        security: [{ BearerAuth: [] }],
+        tags: ["Uploads"],
+        parameters: [{ name: "fileId", in: "path", required: true, schema: { type: "string" } }],
+        responses: {
+          200: { description: "File deleted." },
+          400: { description: "File is referenced and cannot be deleted." },
+          404: { description: "File not found or ownership mismatch." },
+        },
+      },
+    },
+    "/rider/onboarding/vehicle": {
+      put: {
+        summary: "Step 4: Save Vehicle Details",
+        security: [{ BearerAuth: [] }],
+        tags: ["Onboarding"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["brandModel", "documents"],
+                properties: {
+                  ownerName: { type: "string" },
+                  vehicleNumber: { type: "string" },
+                  brandModel: { type: "string" },
+                  fuelType: { type: "string", enum: ["PETROL", "DIESEL", "CNG", "ELECTRIC_HEAVY"] },
+                  loadCapacity: { type: "string" },
+                  permitType: { type: "string", enum: ["INTRA_STATE", "NATIONAL_PERMIT"] },
+                  evCategory: { type: "string", enum: ["HIGH_SPEED", "LOW_SPEED"] },
+                  cycleType: { type: "string", enum: ["STANDARD", "ELECTRIC"] },
+                  dlNumber: { type: "string" },
+                  dlExpiryDate: { type: "string", format: "date" },
+                  dlBadge: { type: "string" },
+                  documents: { type: "object", additionalProperties: { type: "string" } },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Vehicle details saved." },
+          404: { description: "Uploaded document not found." },
+          409: { description: "Vehicle number already registered or step out of order." },
+          422: { description: "Validation error." },
+        },
+      },
+    },
+    "/rider/onboarding/identity/aadhaar/send-otp": {
+      post: {
+        summary: "Step 5a: Send Aadhaar OTP",
+        security: [{ BearerAuth: [] }],
+        tags: ["Identity"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["aadhaarNumber"],
+                properties: {
+                  aadhaarNumber: { type: "string", minLength: 12, maxLength: 12 },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "OTP sent to registered mobile." },
+          422: { description: "Invalid Aadhaar number (Verhoeff checksum failed)." },
+        },
+      },
+    },
+    "/rider/onboarding/identity/aadhaar/verify-otp": {
+      post: {
+        summary: "Step 5b: Verify Aadhaar OTP",
+        security: [{ BearerAuth: [] }],
+        tags: ["Identity"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["referenceId", "otp"],
+                properties: {
+                  referenceId: { type: "string" },
+                  otp: { type: "string", pattern: "^\\d{6}$" },
+                  aadhaarFileId: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Aadhaar verified successfully." },
+          409: { description: "Identity already registered to another rider." },
+          422: { description: "Invalid OTP." },
+          429: { description: "Attempts exceeded (max 3)." },
+        },
+      },
+    },
+    "/rider/onboarding/identity/pan": {
+      put: {
+        summary: "Step 5c: Save PAN and Address Identity",
+        security: [{ BearerAuth: [] }],
+        tags: ["Identity"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["panNumber", "fullName", "address", "panFileId"],
+                properties: {
+                  panNumber: { type: "string", pattern: "^[A-Z]{5}[0-9]{4}[A-Z]$" },
+                  fullName: { type: "string" },
+                  address: { type: "string" },
+                  panFileId: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "PAN identity saved." },
+          404: { description: "PAN document not found." },
+          422: { description: "Validation error." },
+        },
+      },
+    },
+    "/rider/onboarding/selfie": {
+      post: {
+        summary: "Step 6: Submit Selfie with Face Check",
+        security: [{ BearerAuth: [] }],
+        tags: ["Onboarding"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["fileId", "clientFaceDetected"],
+                properties: {
+                  fileId: { type: "string" },
+                  clientFaceDetected: { type: "boolean" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Selfie check passed." },
+          422: { description: "Selfie rejected (NO_FACE, etc.)." },
+          429: { description: "Daily attempts exceeded (5)." },
+        },
+      },
+    },
+    "/rider/onboarding/kit-nominee": {
+      put: {
+        summary: "Step 7: Save Kit Address and Insurance Nominee",
+        security: [{ BearerAuth: [] }],
+        tags: ["Onboarding"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["address", "nominee"],
+                properties: {
+                  address: {
+                    type: "object",
+                    required: ["houseNo", "areaStreet", "pincode", "townCity", "state"],
+                    properties: {
+                      houseNo: { type: "string" },
+                      areaStreet: { type: "string" },
+                      pincode: { type: "string", pattern: "^[1-9][0-9]{5}$" },
+                      townCity: { type: "string" },
+                      state: { type: "string" },
+                    },
+                  },
+                  nominee: {
+                    type: "object",
+                    required: [
+                      "nomineeName",
+                      "nomineeRelationship",
+                      "nomineeDob",
+                      "nomineeMobile",
+                      "emergencyMobile",
+                    ],
+                    properties: {
+                      nomineeName: { type: "string" },
+                      nomineeRelationship: {
+                        type: "string",
+                        enum: [
+                          "SPOUSE",
+                          "FATHER",
+                          "MOTHER",
+                          "SON",
+                          "DAUGHTER",
+                          "BROTHER",
+                          "SISTER",
+                          "OTHER",
+                        ],
+                      },
+                      nomineeDob: { type: "string", format: "date" },
+                      nomineeMobile: { type: "string", pattern: "^[6-9][0-9]{9}$" },
+                      emergencyMobile: { type: "string", pattern: "^[6-9][0-9]{9}$" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Kit address and nominee saved." },
+          422: { description: "Validation error." },
+        },
+      },
+    },
+    "/ifsc/{code}": {
+      get: {
+        summary: "Lookup Bank Details by IFSC",
+        security: [{ BearerAuth: [] }],
+        tags: ["Bank"],
+        parameters: [{ name: "code", in: "path", required: true, schema: { type: "string" } }],
+        responses: {
+          200: { description: "Bank name, branch, and city." },
+          404: { description: "IFSC not found." },
+        },
+      },
+    },
+    "/rider/onboarding/upi/verify": {
+      post: {
+        summary: "Verify UPI ID",
+        security: [{ BearerAuth: [] }],
+        tags: ["Bank"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["upiId"],
+                properties: {
+                  upiId: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "UPI verified, verification ID returned (valid 30 mins)." },
+          422: { description: "Invalid UPI ID." },
+        },
+      },
+    },
+    "/rider/onboarding/bank": {
+      put: {
+        summary: "Step 8: Save Bank Account Details",
+        security: [{ BearerAuth: [] }],
+        tags: ["Bank"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: [
+                  "accountNumber",
+                  "confirmAccountNumber",
+                  "ifscCode",
+                  "accountType",
+                  "passbookFileId",
+                  "upiVerificationId",
+                ],
+                properties: {
+                  accountNumber: { type: "string" },
+                  confirmAccountNumber: { type: "string" },
+                  ifscCode: { type: "string" },
+                  accountType: { type: "string", enum: ["SAVINGS", "CURRENT"] },
+                  passbookFileId: { type: "string" },
+                  upiVerificationId: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Bank account saved." },
+          404: { description: "IFSC or passbook file not found." },
+          422: { description: "Bank account invalid or verification expired." },
+        },
+      },
+    },
+    "/rider/onboarding/submit": {
+      post: {
+        summary: "Step 9: Submit Onboarding Application",
+        security: [{ BearerAuth: [] }],
+        tags: ["Onboarding"],
+        responses: {
+          200: { description: "Application submitted; status PENDING_REVIEW." },
+          409: { description: "Already approved." },
+          422: { description: "Onboarding incomplete or phone required." },
+        },
+      },
+    },
+    "/admin/riders": {
+      get: {
+        summary: "Admin: List Riders with Pagination and Filter",
+        security: [{ BearerAuth: [] }],
+        tags: ["Admin"],
+        parameters: [
+          {
+            name: "status",
+            in: "query",
+            schema: {
+              type: "string",
+              enum: ["IN_PROGRESS", "PENDING_REVIEW", "CHANGES_REQUESTED", "APPROVED", "REJECTED"],
+            },
+          },
+          { name: "q", in: "query", schema: { type: "string" } },
+          { name: "page", in: "query", schema: { type: "integer", default: 1 } },
+          { name: "limit", in: "query", schema: { type: "integer", default: 20 } },
+        ],
+        responses: {
+          200: { description: "Paginated riders list." },
+        },
+      },
+    },
+    "/admin/riders/{riderId}": {
+      get: {
+        summary: "Admin: Get Full Rider Details",
+        security: [{ BearerAuth: [] }],
+        tags: ["Admin"],
+        parameters: [{ name: "riderId", in: "path", required: true, schema: { type: "string" } }],
+        responses: {
+          200: { description: "Full rider onboarding details with signed file URLs." },
+          404: { description: "Rider not found." },
+        },
+      },
+    },
+    "/admin/riders/{riderId}/review": {
+      patch: {
+        summary: "Admin: Review and Decide Onboarding Application",
+        security: [{ BearerAuth: [] }],
+        tags: ["Admin"],
+        parameters: [{ name: "riderId", in: "path", required: true, schema: { type: "string" } }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["decision"],
+                properties: {
+                  decision: { type: "string", enum: ["APPROVE", "REJECT", "REQUEST_CHANGES"] },
+                  reason: { type: "string" },
+                  stepsToRedo: {
+                    type: "array",
+                    items: {
+                      type: "string",
+                      enum: [
+                        "RIDE_TYPE",
+                        "PREFERENCE",
+                        "WORK_AREA",
+                        "VEHICLE",
+                        "IDENTITY",
+                        "SELFIE",
+                        "KIT_NOMINEE",
+                        "BANK",
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Review decision recorded." },
+          409: { description: "Invalid state (not PENDING_REVIEW)." },
+        },
+      },
+    },
+  },
+  components: {
+    securitySchemes: {
+      BearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
+    },
+  },
+};
+
+function generateOpenApiYaml() {
+  const yamlString = YAML.stringify(openApiDocument);
+  const outputPath = path.resolve(process.cwd(), "docs", "openapi.yaml");
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.writeFileSync(outputPath, yamlString, "utf8");
+  console.log(`[OpenAPI] Successfully generated openapi.yaml at ${outputPath}`);
+}
+
+if (require.main === module) {
+  generateOpenApiYaml();
+}
+
+module.exports = { generateOpenApiYaml, openApiDocument };

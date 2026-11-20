@@ -1,0 +1,43 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/delivery/ifsc/SBIN0001234"
+  method: GET
+  headers:
+    Authorization: Bearer {{riderToken}}
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Security-Policy: "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+    Cross-Origin-Opener-Policy: same-origin
+    Cross-Origin-Resource-Policy: cross-origin
+    Origin-Agent-Cluster: ?1
+    Referrer-Policy: no-referrer
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    X-Content-Type-Options: nosniff
+    X-DNS-Prefetch-Control: off
+    X-Download-Options: noopen
+    X-Frame-Options: SAMEORIGIN
+    X-Permitted-Cross-Domain-Policies: none
+    X-XSS-Protection: "0"
+    Access-Control-Allow-Origin: "*"
+    X-Request-Id: e0181b02-044b-4795-b8c4-08aa34e0c24d
+    Content-Type: application/json; charset=utf-8
+    Content-Length: "131"
+    ETag: W/"83-pRG5maxe8kaqgvy7RV6V+qe/f4M"
+    Date: Thu, 19 Nov 2026 13:32:17 GMT
+    Connection: keep-alive
+    Keep-Alive: timeout=5
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "ifscCode": "SBIN0001234",
+          "bankName": "State Bank of India",
+          "branch": "Secunderabad Main",
+          "city": "Hyderabad"
+        }
+      }
+order: 1000

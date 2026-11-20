@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{baseUrl}}/api/delivery/onboarding"
+method: GET
+headers:
+  Authorization: Bearer {{riderToken}}
+examples: .resources/Get Onboarding Summary.resources/examples
+order: 1000

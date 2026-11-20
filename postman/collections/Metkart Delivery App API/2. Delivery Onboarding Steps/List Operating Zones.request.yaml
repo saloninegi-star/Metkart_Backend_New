@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{baseUrl}}/api/delivery/zones?q=Hyderabad&limit=20"
+method: GET
+queryParams:
+  q: Hyderabad
+  limit: "20"
+examples: .resources/List Operating Zones.resources/examples
+order: 5000

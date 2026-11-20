@@ -1,0 +1,30 @@
+name: Metkart Delivery Dedicated Environment
+values:
+  - key: baseUrl
+    value: 'http://localhost:3000/api/delivery'
+  - key: adminBaseUrl
+    value: 'http://localhost:3000/api/admin/delivery'
+  - key: serverUrl
+    value: 'http://localhost:3000'
+  - key: riderToken
+    value: ''
+  - key: refreshToken
+    value: ''
+  - key: adminToken
+    value: ''
+  - key: riderId
+    value: ''
+  - key: fileId_DL
+    value: ''
+  - key: fileId_RC
+    value: ''
+  - key: fileId_PAN
+    value: ''
+  - key: fileId_SELFIE
+    value: ''
+  - key: fileId_PASSBOOK
+    value: ''
+  - key: upiVerificationId
+    value: ''
+  - key: aadhaarRefId
+    value: ''

@@ -1,0 +1,15 @@
+$kind: http-request
+name: "Step 2: Save Preference"
+url: "{{baseUrl}}/api/delivery/onboarding/preference"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{riderToken}}
+body:
+  type: text
+  content: |-
+    {
+      "deliveryPreference": "BOTH_DELIVERIES"
+    }
+examples: .resources/Step 2- Save Preference.resources/examples
+order: 4000

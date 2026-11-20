@@ -1,17 +1,17 @@
 // src/utils/mailer.js
-import nodemailer from "nodemailer"; // agar CommonJS use kar rahe hain to: const nodemailer = require("nodemailer");
+const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT) || 465,
-  secure: Number(process.env.SMTP_PORT) === 465, // 465 ke liye true, 587 ke liye false
+  secure: Number(process.env.SMTP_PORT) === 465,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
 });
 
-export const sendOtpEmail = async (toEmail, otp, fullName = "User") => {
+const sendOtpEmail = async (toEmail, otp, fullName = "User") => {
   const mailOptions = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: toEmail,
@@ -31,3 +31,5 @@ export const sendOtpEmail = async (toEmail, otp, fullName = "User") => {
 
   return await transporter.sendMail(mailOptions);
 };
+
+module.exports = { sendOtpEmail };

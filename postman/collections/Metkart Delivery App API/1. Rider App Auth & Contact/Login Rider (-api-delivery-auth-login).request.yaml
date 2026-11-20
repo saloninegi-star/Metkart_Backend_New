@@ -1,0 +1,20 @@
+$kind: http-request
+name: Login Rider (/api/delivery/auth/login)
+description: Rider password login for verified email accounts. Also accessible via `POST {{baseUrl}}/api/rider/auth/login`.
+url: "{{baseUrl}}/api/delivery/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "gaurav-saini@pearlorganisation.com",
+      "password": "Password123"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_0ahw}}"
+examples: .resources/Login Rider (-api-delivery-auth-login).resources/examples
+order: 4000

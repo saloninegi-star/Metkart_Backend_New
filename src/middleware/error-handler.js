@@ -9,6 +9,22 @@ function errorHandler(error, req, res, next) {
     return next(error);
   }
 
+  if (error.name === "AppError" || error.code) {
+    const requestId = req.requestId || req.get("x-request-id") || req.get("X-Request-Id") || "unknown";
+    const resPayload = {
+      success: false,
+      error: {
+        code: error.code || "APP_ERROR",
+        message: error.message,
+        requestId,
+      },
+    };
+    if (error.details !== undefined) {
+      resPayload.error.details = error.details;
+    }
+    return res.status(error.httpStatus || error.statusCode || 400).json(resPayload);
+  }
+
   let statusCode = error.statusCode || 500;
   let message = error.message || "Internal server error";
   let details = error.details;

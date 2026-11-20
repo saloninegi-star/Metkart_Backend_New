@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/admin/delivery/riders/{{riderId}}/review"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adminToken}}
+body:
+  type: text
+  content: |-
+    {
+      "decision": "APPROVE",
+      "reason": "All documents verified and in order."
+    }
+order: 3000
