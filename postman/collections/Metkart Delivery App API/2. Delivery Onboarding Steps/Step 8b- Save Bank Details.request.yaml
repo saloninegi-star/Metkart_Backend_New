@@ -1,0 +1,20 @@
+$kind: http-request
+name: "Step 8b: Save Bank Details"
+url: "{{baseUrl}}/api/delivery/onboarding/bank"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{riderToken}}
+body:
+  type: text
+  content: |-
+    {
+      "accountNumber": "123456789012",
+      "confirmAccountNumber": "123456789012",
+      "ifscCode": "SBIN0001234",
+      "accountType": "SAVINGS",
+      "passbookFileId": "{{fileId_PASSBOOK}}",
+      "upiVerificationId": "{{upiVerificationId}}"
+    }
+examples: .resources/Step 8b- Save Bank Details.resources/examples
+order: 18000

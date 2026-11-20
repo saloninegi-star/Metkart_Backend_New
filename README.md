@@ -187,3 +187,71 @@ test/
 ```
 
 The server connects to MongoDB before accepting HTTP traffic and closes the database connection on shutdown. Do not commit `.env` or production secrets.
+
+
+## Delivery Boy / Rider Onboarding API
+
+The Delivery / Rider module provides an isolated, production-grade 8-step onboarding flow for delivery partners supporting both two-wheeler and heavy vehicles.
+
+### Architecture (Three Separate Apps)
+- **Customer App:** `/api/user/*`
+- **Vendor App:** `/api/vendor/*`
+- **Delivery / Rider App:** `/api/delivery/*` (and `/api/rider/*`, aliased to `/api/v1/*` per v1.1 requirements specification)
+
+### Environment Variables
+| Variable | Default | Description |
+|---|---|---|
+| `PROVIDER_MODE` | `mock` | `mock` runs full flow locally without external credentials. `real` plugs into third-party providers. |
+| `PASSWORD_MIN_LENGTH` | `6` | Minimum password length for rider signup. |
+| `OTP_EXPIRY_SECONDS` | `600` | 10 minutes OTP validity. |
+| `OTP_RESEND_SECONDS` | `45` | 45-second cooldown between OTP resends. |
+| `OTP_MAX_ATTEMPTS` | `5` | Maximum wrong OTP attempts before lockout. |
+| `UPLOAD_MAX_BYTES` | `5242880` | 5 MB maximum upload file size. |
+| `JWT_ACCESS_TTL` | `15m` | 15-minute access token lifespan. |
+| `REFRESH_TTL_DAYS` | `30` | 30-day rotating refresh token lifetime. |
+| `DATA_ENCRYPTION_KEY` | - | 32+ char key for AES-256-GCM encryption of PAN and Bank account at rest. |
+| `DATA_ENCRYPTION_KEY_ID` | `k1` | Key identifier stored beside ciphertext for seamless key rotation. |
+| `AADHAAR_HMAC_KEY` | - | 32+ char secret for Aadhaar duplicate detection HMAC. |
+| `MEDICAL_COVER_INR` | `100000` | Medical insurance cover provided upon admin approval (1 Lakh INR). |
+| `ACCIDENTAL_COVER_INR` | `1000000` | Accidental life insurance cover provided upon admin approval (10 Lakh INR). |
+| `SELFIE_MAX_ATTEMPTS_PER_DAY` | `5` | Daily limit on face match/liveness attempts. |
+
+### Endpoints Overview
+
+#### 1. Authentication (`/api/delivery/auth` or `/api/v1/auth`)
+- `POST /register`: Register with `{ email, password, role: "RIDER", phone? }`. In mock mode, sends OTP.
+- `POST /otp/verify`: Verify email with `{ email, otp }`. In mock mode, valid OTP is `123456`. Returns JWT tokens and current onboarding step.
+- `POST /otp/resend`: Resend verification code (45s cooldown).
+- `POST /login`: Authenticate rider with `{ email, password }`.
+- `POST /refresh`: Rotate refresh token family.
+
+#### 2. Onboarding Steps (`/api/delivery/onboarding` or `/api/v1/rider/onboarding`)
+- `GET /`: Get complete onboarding summary (masked sensitive data, `currentStep`, `canSubmit`).
+- `GET /status`: Lightweight status summary (`status`, `referenceNumber`, `stepsToRedo`).
+- `PATCH /contact`: Set/update rider contact phone (`^[6-9][0-9]{9}$`).
+- `PUT /ride-type`: Step 1 — Select `TWO_WHEELER` or `HEAVY_VEHICLE`.
+- `PUT /preference`: Step 2 — Delivery preference (`FOOD_DELIVERY`, `GROCERY_DELIVERY`, `BOTH_DELIVERIES`, `HEAVY_DELIVERY`, `SCRAP_PICKER`).
+- `GET /zones`: Helper — List active zones with demand level and coordinates.
+- `PUT /work-area`: Step 3 — Select operating `zoneId`, `vehicleType`, and `vehicleOwnership` (if heavy).
+- `POST /uploads`: Helper — Multipart document/photo upload with MIME sniffing (JPEG, PNG, WEBP, PDF).
+- `DELETE /uploads/:fileId`: Helper — Delete unreferenced private upload.
+- `PUT /vehicle`: Step 4 — Vehicle registration, DL, and document file IDs.
+- `POST /identity/aadhaar/send-otp`: Step 5a — 12-digit Aadhaar with Verhoeff checksum.
+- `POST /identity/aadhaar/verify-otp`: Step 5b — 6-digit Aadhaar OTP (mock: `123456`).
+- `PUT /identity/pan`: Step 5c — Alternative PAN document and address verification.
+- `POST /selfie`: Step 6 — Selfie image with liveness and face match score.
+- `PUT /kit-nominee`: Step 7 — Kit shipping address (36 Indian States/UTs) and insurance nominee.
+- `GET /ifsc/:code`: Helper — Lookup bank name and branch from IFSC.
+- `POST /upi/verify`: Helper — Verify UPI ID (valid for 30 minutes).
+- `PUT /bank`: Step 8 — Bank account number, IFSC, penny drop verification, name match.
+- `POST /submit`: Step 9 — Submit completed application for admin review (generates reference `RDR-<year>-<seq>`).
+
+#### 3. Admin Review API (`/api/v1/admin/riders` or `/api/admin/delivery/riders`)
+- `GET /`: Paginated rider list with status and anchored search filters.
+- `GET /:riderId`: Complete rider profile with 10-minute temporary signed file URLs.
+- `PATCH /:riderId/review`: Make review decision (`APPROVE`, `REJECT`, `REQUEST_CHANGES`). Approving creates `kit_orders` and `insurance_enrollments`.
+
+#### 4. Monitoring & Observability
+- `GET /healthz`: Process liveness.
+- `GET /readyz`: MongoDB replica ping check.
+- `GET /metrics`: Request count, status codes, and latency tracking.

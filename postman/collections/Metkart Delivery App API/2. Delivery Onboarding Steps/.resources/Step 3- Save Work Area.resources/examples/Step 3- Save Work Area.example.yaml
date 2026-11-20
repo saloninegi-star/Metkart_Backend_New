@@ -1,0 +1,70 @@
+$kind: http-example
+name: "Step 3: Save Work Area"
+request:
+  url: "{{baseUrl}}/api/delivery/onboarding/work-area"
+  method: PUT
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer {{riderToken}}
+  body:
+    type: text
+    content: |-
+      {
+        "zoneId":"zone-medipally",                                                                                           
+        "vehicleType": "MOTORCYCLE"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Security-Policy: "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+    Cross-Origin-Opener-Policy: same-origin
+    Cross-Origin-Resource-Policy: cross-origin
+    Origin-Agent-Cluster: ?1
+    Referrer-Policy: no-referrer
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    X-Content-Type-Options: nosniff
+    X-DNS-Prefetch-Control: off
+    X-Download-Options: noopen
+    X-Frame-Options: SAMEORIGIN
+    X-Permitted-Cross-Domain-Policies: none
+    X-XSS-Protection: "0"
+    Access-Control-Allow-Origin: "*"
+    X-Request-Id: f6ad5b4d-a8e9-429a-948e-ec3021102936
+    Content-Type: application/json; charset=utf-8
+    Content-Length: "443"
+    ETag: W/"1bb-HdwEIzabVfY/GiF3O7XboDmZjwc"
+    Date: Thu, 19 Nov 2026 11:39:36 GMT
+    Connection: keep-alive
+    Keep-Alive: timeout=5
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "status": "IN_PROGRESS",
+          "currentStep": "VEHICLE",
+          "completedSteps": [
+            "RIDE_TYPE",
+            "PREFERENCE",
+            "WORK_AREA"
+          ],
+          "canSubmit": false,
+          "phone": "7897897894",
+          "rideType": "TWO_WHEELER",
+          "deliveryPreference": "BOTH_DELIVERIES",
+          "workArea": {
+            "zoneId": "zone-medipally",
+            "zoneName": "Medipally and Uppal Hub (Zone 04)",
+            "vehicleType": "MOTORCYCLE",
+            "vehicleOwnership": null
+          },
+          "vehicle": null,
+          "identity": null,
+          "selfie": null,
+          "kitNominee": null,
+          "bank": null
+        }
+      }
+order: 1000

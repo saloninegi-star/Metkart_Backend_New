@@ -1,0 +1,9 @@
+$kind: http-request
+name: "Step 9: Submit Onboarding Application"
+url: "{{baseUrl}}/api/delivery/onboarding/submit"
+method: POST
+headers:
+  Authorization: Bearer {{riderToken}}
+  Idempotency-Key: "{{$guid}}"
+examples: .resources/Step 9- Submit Onboarding Application.resources/examples
+order: 19000

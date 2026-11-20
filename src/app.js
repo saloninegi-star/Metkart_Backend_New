@@ -15,6 +15,7 @@ const { notFound, errorHandler } = require("./middleware/error-handler");
 const adminAuthRoutes = require("./modules/admin/admin_auth/auth.routes");
 const shopTypeRoutes = require("./modules/admin/shopkeeper/shoptype/shoptype.routes");
 const shopCategoryRoutes = require("./modules/admin/shopkeeper/shopCategory/shopCategory.routes");
+const createGroceryCartRoutes = require("./modules/user/grocery/cart/cart.routes");
 
 // Admin - Vendor Management Routes
 const businessTypeRoutes = require("./modules/admin/vendor/businessType/businessType.routes");
@@ -36,6 +37,22 @@ const vendorProfileRoutes = require("./modules/vendor/profile/profile.routes");
 // ==========================================
 const userAuthRoutes = require("./modules/user/auth/userAuth.router");
 const createOrderRoutes = require("./modules/user/orders/orders.routes");
+
+// ==========================================
+// Delivery / Rider App Routes
+// ==========================================
+const {
+  createDeliveryModule,
+  onboardingRoutes: deliveryOnboardingRoutes,
+  zonesRoutes: deliveryZonesRoutes,
+  uploadsRoutes: deliveryUploadsRoutes,
+  ifscRoutes: deliveryIfscRoutes,
+  adminRoutes: deliveryAdminRoutes,
+  requestIdMiddleware,
+  noSqlSanitizer,
+  deliveryErrorHandler,
+} = require("./modules/delivery");
+const { monitoringRoutes } = require("./modules/delivery/monitoring/monitoring.routes");
 
 function createApp(config) {
   const app = express();
@@ -59,6 +76,57 @@ function createApp(config) {
 
   // Health route
   app.use("/health", healthRoutes);
+  app.use(monitoringRoutes);
+
+  // ==========================================
+  // Delivery Boy / Rider Dedicated App Routes
+  // ==========================================
+  app.use("/api/delivery", createDeliveryModule());
+  app.use("/api/rider", createDeliveryModule());
+
+  // Direct spec routes under /api/v1
+  app.use(
+    "/api/v1/rider/onboarding",
+    requestIdMiddleware,
+    noSqlSanitizer,
+    deliveryOnboardingRoutes,
+    deliveryErrorHandler
+  );
+  app.use(
+    "/api/v1/zones",
+    requestIdMiddleware,
+    noSqlSanitizer,
+    deliveryZonesRoutes,
+    deliveryErrorHandler
+  );
+  app.use(
+    "/api/v1/uploads",
+    requestIdMiddleware,
+    noSqlSanitizer,
+    deliveryUploadsRoutes,
+    deliveryErrorHandler
+  );
+  app.use(
+    "/api/v1/ifsc",
+    requestIdMiddleware,
+    noSqlSanitizer,
+    deliveryIfscRoutes,
+    deliveryErrorHandler
+  );
+  app.use(
+    "/api/v1/admin",
+    requestIdMiddleware,
+    noSqlSanitizer,
+    deliveryAdminRoutes,
+    deliveryErrorHandler
+  );
+  app.use(
+    "/api/admin/delivery",
+    requestIdMiddleware,
+    noSqlSanitizer,
+    deliveryAdminRoutes,
+    deliveryErrorHandler
+  );
 
   // App API Routes
   app.use("/api/v1/auth", createAuthRoutes(config));
@@ -79,6 +147,7 @@ function createApp(config) {
   // ==========================================
   app.use("/api/user/auth", userAuthRoutes);
   app.use("/api/user/orders", createOrderRoutes(config));
+  app.use("/api/user/grocery/cart", createGroceryCartRoutes(config));
 
   app.get(
     "/api/v1/user-app/me",

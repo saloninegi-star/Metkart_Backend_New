@@ -1,0 +1,16 @@
+$kind: http-request
+name: "Step 5b: Aadhaar Verify OTP"
+url: "{{baseUrl}}/api/delivery/onboarding/identity/aadhaar/verify-otp"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{riderToken}}
+body:
+  type: text
+  content: |-
+    {
+      "referenceId": "{{aadhaarRefId}}",
+      "otp": "123456"
+    }
+examples: .resources/Step 5b- Aadhaar Verify OTP.resources/examples
+order: 12000

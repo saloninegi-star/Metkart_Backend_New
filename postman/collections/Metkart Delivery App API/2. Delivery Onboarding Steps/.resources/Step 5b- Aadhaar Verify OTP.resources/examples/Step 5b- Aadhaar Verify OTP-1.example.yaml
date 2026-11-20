@@ -1,0 +1,52 @@
+$kind: http-example
+name: "Step 5b: Aadhaar Verify OTP"
+request:
+  url: "{{baseUrl}}/api/delivery/onboarding/identity/aadhaar/verify-otp"
+  method: POST
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer {{riderToken}}
+  body:
+    type: text
+    content: |-
+      {
+        "referenceId": "{{aadhaarRefId}}",
+        "otp": "123456"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Security-Policy: "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+    Cross-Origin-Opener-Policy: same-origin
+    Cross-Origin-Resource-Policy: cross-origin
+    Origin-Agent-Cluster: ?1
+    Referrer-Policy: no-referrer
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    X-Content-Type-Options: nosniff
+    X-DNS-Prefetch-Control: off
+    X-Download-Options: noopen
+    X-Frame-Options: SAMEORIGIN
+    X-Permitted-Cross-Domain-Policies: none
+    X-XSS-Protection: "0"
+    Access-Control-Allow-Origin: "*"
+    X-Request-Id: f8d1b12e-0178-4bb9-b9ee-14445beceacc
+    Content-Type: application/json; charset=utf-8
+    Content-Length: "117"
+    ETag: W/"75-V5zs/HO/wFyQlL9DD2go80zKUps"
+    Date: Thu, 19 Nov 2026 13:09:55 GMT
+    Connection: keep-alive
+    Keep-Alive: timeout=5
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "idType": "AADHAAR",
+          "status": "VERIFIED",
+          "name": "Test Rider",
+          "aadhaarMasked": "XXXX XXXX 1236"
+        }
+      }
+order: 2000

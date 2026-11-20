@@ -1,0 +1,17 @@
+$kind: http-request
+name: "Step 5c: Save PAN Identity"
+url: "{{baseUrl}}/api/delivery/onboarding/identity/pan"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{riderToken}}
+body:
+  type: text
+  content: |-
+    {
+      "panNumber": "ABCDE1234F",
+      "fullName": "Test Rider",
+      "address": "Plot 12, Main Street, Hyderabad",
+      "panFileId": "{{fileId_PAN}}"
+    }
+order: 13000

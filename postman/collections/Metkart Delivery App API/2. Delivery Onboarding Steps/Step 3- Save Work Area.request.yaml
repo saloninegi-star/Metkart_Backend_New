@@ -1,0 +1,16 @@
+$kind: http-request
+name: "Step 3: Save Work Area"
+url: "{{baseUrl}}/api/delivery/onboarding/work-area"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{riderToken}}
+body:
+  type: text
+  content: |-
+    {
+      "zoneId":"zone-medipally",                                                                                           
+      "vehicleType": "MOTORCYCLE"
+    }
+examples: .resources/Step 3- Save Work Area.resources/examples
+order: 6000

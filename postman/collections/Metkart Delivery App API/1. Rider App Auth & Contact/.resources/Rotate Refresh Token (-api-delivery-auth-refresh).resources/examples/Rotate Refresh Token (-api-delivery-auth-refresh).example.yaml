@@ -1,0 +1,48 @@
+$kind: http-example
+name: Rotate Refresh Token (/api/delivery/auth/refresh)
+request:
+  url: "{{baseUrl}}/api/delivery/auth/refresh"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: text
+    content: |-
+      {
+        "refreshToken": "{{refreshToken}}"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Security-Policy: "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+    Cross-Origin-Opener-Policy: same-origin
+    Cross-Origin-Resource-Policy: cross-origin
+    Origin-Agent-Cluster: ?1
+    Referrer-Policy: no-referrer
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    X-Content-Type-Options: nosniff
+    X-DNS-Prefetch-Control: off
+    X-Download-Options: noopen
+    X-Frame-Options: SAMEORIGIN
+    X-Permitted-Cross-Domain-Policies: none
+    X-XSS-Protection: "0"
+    Access-Control-Allow-Origin: "*"
+    X-Request-Id: 8d39f658-162f-427a-8c5b-9e77fac9beed
+    Content-Type: application/json; charset=utf-8
+    Content-Length: "376"
+    ETag: W/"178-vKZYIk2ewXzszjD6BeLdKi/LH/I"
+    Date: Thu, 19 Nov 2026 11:28:33 GMT
+    Connection: keep-alive
+    Keep-Alive: timeout=5
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWZlZDBiNzlhYjZiZmZkYzViYmI3ZTgiLCJlbWFpbCI6ImdhdXJhdi1zYWluaUBwZWFybG9yZ2FuaXNhdGlvbi5jb20iLCJyb2xlIjoiUklERVIiLCJpYXQiOjE3OTUwODc3MTMsImV4cCI6MTc5NTA4ODYxM30.wWI8C0SqvdX_5Qo4KYwZWYlfspKsID7IHBNBKgPJxo8",
+          "refreshToken": "4973f48ba6bc30a75538b86ff767d35f46227409f754525b76a651a2e69d4d55"
+        }
+      }
+order: 1000

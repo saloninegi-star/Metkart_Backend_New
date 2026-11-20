@@ -1,0 +1,22 @@
+$kind: http-request
+name: "Step 4: Save Vehicle Details"
+url: "{{baseUrl}}/api/delivery/onboarding/vehicle"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{riderToken}}
+body:
+  type: text
+  content: |-
+    {
+      "vehicleNumber": "TS09EA1234",
+      "brandModel": "Hero Splendor Plus",
+      "fuelType": "PETROL",
+      "dlNumber": "TS0920210001234",
+      "dlExpiryDate": "2030-12-31",
+      "documents": {
+        "dlFileId": "{{fileId_DL}}",
+        "rcFileId": "{{fileId_RC}}"
+      }
+    }
+order: 10000
