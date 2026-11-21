@@ -22,7 +22,8 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.9.5",
     "multer": "^2.5.0",
-    "nodemailer": "^10.6.0"
+    "nodemailer": "^10.6.0",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.9",

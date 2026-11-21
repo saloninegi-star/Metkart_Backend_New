@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "216754ea-3df9-4ce3-9c95-28e0e9cfb395",
+    "_postman_id": "93d6e5ee-3a36-454a-ba69-81ca0c2422c6",
     "name": "Metkart Complete API Collection",
     "description": "Complete, fully-featured Postman collection for all Metkart backend endpoints: Health, User App (OTP Auth & Orders), Admin (Auth, Shopkeeper, Vendor Settings, Onboarding Approvals), Vendor (OTP Auth, Dashboard, Profile, Onboarding, Products), and Platform v1 APIs.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
