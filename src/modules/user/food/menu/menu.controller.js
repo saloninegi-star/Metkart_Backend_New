@@ -288,7 +288,7 @@ exports.getMenuByRestaurantId = asyncHandler(async (req, res) => {
       catObj.qrCode = generatedQrCode;
       if (cat.save && cat.qrCode && cat.qrCode.startsWith("data:image")) {
         cat.qrCode = generatedQrCode;
-        cat.save().catch(() => {});
+        cat.save().catch(() => { });
       }
     }
     totalDishes += catObj.products ? catObj.products.length : 0;
@@ -448,18 +448,198 @@ exports.getRestaurantQrCode = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Update a menu category or its products
+ * @route   PUT /api/user/food/menu/:id (and PUT /api/user/food/menu)
+ * @access  Private (Vendor Token Required)
+ */
+exports.updateMenu = asyncHandler(async (req, res) => {
+  const targetId = req.params.id || req.body.menuId || req.body.restaurant_id || req.body.restaurantId;
+
+  let menu;
+  if (targetId && mongoose.Types.ObjectId.isValid(targetId)) {
+    menu = await Menu.findById(targetId);
+    if (!menu) {
+      menu = await Menu.findOne({ restaurantId: targetId, isActive: true });
+    }
+  } else if (req.vendor?._id) {
+    menu = await Menu.findOne({ restaurantId: req.vendor._id, isActive: true });
+  }
+
+  if (!menu || !menu.isActive) {
+    throw new ApiError(404, "Menu not found with the provided ID");
+  }
+
+  // Ensure caller owns this restaurant menu
+  if (
+    req.vendor &&
+    req.vendor._id.toString() !== menu.restaurantId.toString()
+  ) {
+    throw new ApiError(403, "You do not have permission to update this menu");
+  }
+
+  const body = req.body || {};
+
+  if (body.categoryName && typeof body.categoryName === "string") {
+    menu.categoryName = body.categoryName.trim();
+  }
+
+  if (body.categoryDescription !== undefined) {
+    menu.categoryDescription = String(body.categoryDescription).trim();
+  }
+
+  if (body.isActive !== undefined) {
+    menu.isActive = body.isActive === true || body.isActive === "true";
+  }
+
+  if (body.products) {
+    const updatedProducts = parseProductsBody(body, req.files);
+    const shouldAppend = body.append === true || body.append === "true" || req.query.append === "true";
+
+    if (shouldAppend) {
+      menu.products.push(...updatedProducts);
+    } else {
+      menu.products = updatedProducts;
+    }
+  }
+
+  if (!menu.qrCode || menu.qrCode.startsWith("data:image")) {
+    const { qrCode, menuUrl } = await generateMenuQrCode(menu.restaurantId);
+    menu.qrCode = qrCode;
+    menu.menuUrl = menuUrl;
+  }
+
+  await menu.save();
+  await menu.populate("restaurantId", "email onboardingData onboardingStatus");
+
+  const rId = menu.restaurantId?._id || menu.restaurantId;
+  return res.status(200).json({
+    success: true,
+    message: "Menu updated successfully",
+    data: {
+      _id: menu._id,
+      restaurantId: rId,
+      restaurant: formatRestaurantInfo(menu.restaurantId),
+      categoryName: menu.categoryName,
+      categoryDescription: menu.categoryDescription,
+      products: menu.products,
+      totalProducts: menu.products.length,
+      qrCode: menu.qrCode,
+      menuUrl: menu.menuUrl,
+      createdAt: menu.createdAt,
+      updatedAt: menu.updatedAt,
+    },
+  });
+});
+
+/**
+ * @desc    Update a single product inside a menu
+ * @route   PUT /api/user/food/menu/:menuId/product/:productId (and /product/:productId)
+ * @access  Private (Vendor Token Required)
+ */
+exports.updateProduct = asyncHandler(async (req, res) => {
+  const { menuId, productId } = req.params;
+  const targetProductId = productId || req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(targetProductId)) {
+    throw new ApiError(400, "Invalid product ID");
+  }
+
+  let menu;
+  if (menuId && mongoose.Types.ObjectId.isValid(menuId)) {
+    menu = await Menu.findById(menuId);
+  } else {
+    menu = await Menu.findOne({ "products._id": targetProductId, isActive: true });
+  }
+
+  if (!menu || !menu.isActive) {
+    throw new ApiError(404, "Menu or product not found");
+  }
+
+  // Ensure caller owns this restaurant menu
+  if (
+    req.vendor &&
+    req.vendor._id.toString() !== menu.restaurantId.toString()
+  ) {
+    throw new ApiError(403, "You do not have permission to modify this menu");
+  }
+
+  const product = menu.products.id(targetProductId);
+  if (!product) {
+    throw new ApiError(404, "Product not found in this menu");
+  }
+
+  const body = req.body || {};
+
+  if (body.dishName) product.dishName = String(body.dishName).trim();
+  if (body.name) product.dishName = String(body.name).trim();
+
+  if (body.foodType) {
+    const fType = String(body.foodType).toLowerCase().trim();
+    if (["veg", "non-veg", "vegan", "egg"].includes(fType)) {
+      product.foodType = fType;
+    }
+  }
+
+  if (body.badge !== undefined) {
+    product.badge = body.badge ? String(body.badge).trim() : null;
+  }
+
+  if (body.description !== undefined) {
+    product.description = String(body.description).trim();
+  }
+
+  if (body.price !== undefined) {
+    const priceNum = Number(body.price);
+    if (isNaN(priceNum) || priceNum < 0) {
+      throw new ApiError(400, "Price must be a valid positive number");
+    }
+    product.price = priceNum;
+  }
+
+  if (body.originalPrice !== undefined) {
+    const origNum = Number(body.originalPrice);
+    product.originalPrice = !isNaN(origNum) && origNum >= 0 ? origNum : null;
+  }
+
+  if (body.isAvailable !== undefined) {
+    product.isAvailable = body.isAvailable === true || body.isAvailable === "true";
+  }
+
+  if (req.files && req.files.length > 0) {
+    product.image = `/storage/restaurant-menu/${req.files[0].filename}`;
+  } else if (body.image !== undefined) {
+    product.image = body.image ? String(body.image).trim() : null;
+  }
+
+  await menu.save();
+
+  return res.status(200).json({
+    success: true,
+    message: "Dish updated successfully",
+    data: {
+      menuId: menu._id,
+      product,
+    },
+  });
+});
+
+/**
  * @desc    Delete a menu category
  * @route   DELETE /api/user/food/menu/:id
  * @access  Private (Vendor Token Required)
  */
 exports.deleteMenu = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const targetId = req.params.id || req.body.menuId || req.body.restaurant_id || req.body.restaurantId;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new ApiError(400, "Invalid menu ID");
+  if (!targetId || !mongoose.Types.ObjectId.isValid(targetId)) {
+    throw new ApiError(400, "Valid menu ID or restaurant ID is required");
   }
 
-  const menu = await Menu.findById(id);
+  let menu = await Menu.findById(targetId);
+  if (!menu) {
+    menu = await Menu.findOne({ restaurantId: targetId, isActive: true });
+  }
+
   if (!menu) {
     throw new ApiError(404, "Menu not found");
   }
@@ -472,12 +652,18 @@ exports.deleteMenu = asyncHandler(async (req, res) => {
     throw new ApiError(403, "You do not have permission to delete this menu");
   }
 
-  menu.isActive = false;
-  await menu.save();
+  const isPermanent = req.query.permanent === "true" || req.body.permanent === true;
+  if (isPermanent) {
+    await Menu.findByIdAndDelete(menu._id);
+  } else {
+    menu.isActive = false;
+    await menu.save();
+  }
 
   return res.status(200).json({
     success: true,
-    message: "Menu deleted successfully",
+    message: isPermanent ? "Menu permanently deleted" : "Menu deleted successfully",
+    menuId: menu._id,
   });
 });
 
@@ -488,12 +674,19 @@ exports.deleteMenu = asyncHandler(async (req, res) => {
  */
 exports.deleteProduct = asyncHandler(async (req, res) => {
   const { menuId, productId } = req.params;
+  const targetProductId = productId || req.params.id;
 
-  if (!mongoose.Types.ObjectId.isValid(menuId) || !mongoose.Types.ObjectId.isValid(productId)) {
-    throw new ApiError(400, "Invalid menu ID or product ID");
+  if (!targetProductId || !mongoose.Types.ObjectId.isValid(targetProductId)) {
+    throw new ApiError(400, "Invalid product ID");
   }
 
-  const menu = await Menu.findById(menuId);
+  let menu;
+  if (menuId && mongoose.Types.ObjectId.isValid(menuId)) {
+    menu = await Menu.findById(menuId);
+  } else {
+    menu = await Menu.findOne({ "products._id": targetProductId, isActive: true });
+  }
+
   if (!menu || !menu.isActive) {
     throw new ApiError(404, "Menu not found");
   }
@@ -506,7 +699,7 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
   }
 
   const initialCount = menu.products.length;
-  menu.products = menu.products.filter((p) => p._id.toString() !== productId);
+  menu.products = menu.products.filter((p) => p._id.toString() !== targetProductId);
 
   if (menu.products.length === initialCount) {
     throw new ApiError(404, "Product not found in this menu");
@@ -517,6 +710,9 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
   return res.status(200).json({
     success: true,
     message: "Product removed from menu successfully",
-    data: menu,
+    data: {
+      menuId: menu._id,
+      remainingProducts: menu.products.length,
+    },
   });
 });

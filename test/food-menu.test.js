@@ -260,3 +260,207 @@ test("GET QR code specifically does not require authentication", async () => {
     Vendor.findById = originalVendorFindById;
   }
 });
+
+test("update menu requires a vendor token", async () => {
+  const response = await request(app).put("/api/user/food/menu/678e1234567890abcdef1234").send({
+    categoryName: "Updated Starters",
+  });
+  assert.equal(response.status, 401);
+});
+
+test("vendor can update menu category and products", async () => {
+  const vendor = {
+    _id: "507f1f77bcf86cd799439011",
+    email: "chef@example.com",
+    isEmailVerified: true,
+    status: "active",
+    onboardingStatus: "approved",
+    onboardingData: {
+      restaurantName: "Heritage Awadh Kitchen",
+    },
+  };
+
+  const sampleMenu = {
+    _id: "678e1234567890abcdef1234",
+    restaurantId: vendor._id,
+    categoryName: "Chef's Signature Selections",
+    categoryDescription: "Original description",
+    products: [
+      {
+        _id: "678e1234567890abcdef1299",
+        dishName: "Galouti Kebab",
+        price: 400,
+      },
+    ],
+    qrCode: `/storage/restaurant-menu/qr-${vendor._id}.png`,
+    menuUrl: `https://metkart.com/menu/${vendor._id}`,
+    isActive: true,
+    save: async () => {},
+    populate: async () => {},
+  };
+
+  const originalVendorFindById = Vendor.findById;
+  const originalMenuFindById = Menu.findById;
+
+  Vendor.findById = async () => vendor;
+  Menu.findById = async () => sampleMenu;
+
+  try {
+    const token = makeVendorToken(vendor);
+    const response = await request(app)
+      .put(`/api/user/food/menu/${sampleMenu._id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        categoryName: "Awadhi Royal Starters",
+        categoryDescription: "Updated royal recipes",
+      });
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.success, true);
+    assert.equal(response.body.data.categoryName, "Awadhi Royal Starters");
+    assert.equal(response.body.data.categoryDescription, "Updated royal recipes");
+  } finally {
+    Vendor.findById = originalVendorFindById;
+    Menu.findById = originalMenuFindById;
+  }
+});
+
+test("vendor can update a single dish in menu", async () => {
+  const vendor = {
+    _id: "507f1f77bcf86cd799439011",
+    email: "chef@example.com",
+    isEmailVerified: true,
+    status: "active",
+    onboardingStatus: "approved",
+  };
+
+  const dishObj = {
+    _id: "678e1234567890abcdef1299",
+    dishName: "Galouti Kebab",
+    foodType: "non-veg",
+    price: 400,
+    originalPrice: 450,
+    isAvailable: true,
+  };
+
+  const sampleMenu = {
+    _id: "678e1234567890abcdef1234",
+    restaurantId: vendor._id,
+    products: {
+      id: (id) => (String(id) === String(dishObj._id) ? dishObj : null),
+    },
+    isActive: true,
+    save: async () => {},
+  };
+
+  const originalVendorFindById = Vendor.findById;
+  const originalMenuFindById = Menu.findById;
+
+  Vendor.findById = async () => vendor;
+  Menu.findById = async () => sampleMenu;
+
+  try {
+    const token = makeVendorToken(vendor);
+    const response = await request(app)
+      .put(`/api/user/food/menu/${sampleMenu._id}/product/${dishObj._id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        dishName: "Smoked Galouti Kebab Special",
+        price: 450,
+        badge: "MUST TRY",
+      });
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.success, true);
+    assert.equal(response.body.data.product.dishName, "Smoked Galouti Kebab Special");
+    assert.equal(response.body.data.product.price, 450);
+    assert.equal(response.body.data.product.badge, "MUST TRY");
+  } finally {
+    Vendor.findById = originalVendorFindById;
+    Menu.findById = originalMenuFindById;
+  }
+});
+
+test("vendor can delete a single dish from menu", async () => {
+  const vendor = {
+    _id: "507f1f77bcf86cd799439011",
+    email: "chef@example.com",
+    isEmailVerified: true,
+    status: "active",
+    onboardingStatus: "approved",
+  };
+
+  const sampleMenu = {
+    _id: "678e1234567890abcdef1234",
+    restaurantId: vendor._id,
+    products: [
+      {
+        _id: "678e1234567890abcdef1299",
+        dishName: "Dish to Remove",
+      },
+      {
+        _id: "678e1234567890abcdef1288",
+        dishName: "Dish to Keep",
+      },
+    ],
+    isActive: true,
+    save: async () => {},
+  };
+
+  const originalVendorFindById = Vendor.findById;
+  const originalMenuFindById = Menu.findById;
+
+  Vendor.findById = async () => vendor;
+  Menu.findById = async () => sampleMenu;
+
+  try {
+    const token = makeVendorToken(vendor);
+    const response = await request(app)
+      .delete(`/api/user/food/menu/${sampleMenu._id}/product/678e1234567890abcdef1299`)
+      .set("Authorization", `Bearer ${token}`);
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.success, true);
+    assert.equal(response.body.data.remainingProducts, 1);
+  } finally {
+    Vendor.findById = originalVendorFindById;
+    Menu.findById = originalMenuFindById;
+  }
+});
+
+test("vendor can delete a menu category", async () => {
+  const vendor = {
+    _id: "507f1f77bcf86cd799439011",
+    email: "chef@example.com",
+    isEmailVerified: true,
+    status: "active",
+    onboardingStatus: "approved",
+  };
+
+  const sampleMenu = {
+    _id: "678e1234567890abcdef1234",
+    restaurantId: vendor._id,
+    isActive: true,
+    save: async () => {},
+  };
+
+  const originalVendorFindById = Vendor.findById;
+  const originalMenuFindById = Menu.findById;
+
+  Vendor.findById = async () => vendor;
+  Menu.findById = async () => sampleMenu;
+
+  try {
+    const token = makeVendorToken(vendor);
+    const response = await request(app)
+      .delete(`/api/user/food/menu/${sampleMenu._id}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.success, true);
+    assert.equal(sampleMenu.isActive, false);
+  } finally {
+    Vendor.findById = originalVendorFindById;
+    Menu.findById = originalMenuFindById;
+  }
+});
