@@ -46,6 +46,13 @@ function parseData(body) {
   }
 
   data = { ...data, ...formFields };
+
+  if (data.fullName && !data.ownerFullName) data.ownerFullName = data.fullName;
+  if (data.emailAddress && !data.email) data.email = data.emailAddress;
+  if (data.mechanicName && !data.garageName) data.garageName = data.mechanicName;
+  if (data.scrapVendorName && !data.businessName) data.businessName = data.scrapVendorName;
+  if (data.fssaiLicenseNumber && !data.fssaiNumber) data.fssaiNumber = data.fssaiLicenseNumber;
+
   if (typeof data.location === "string") {
     try {
       data.location = JSON.parse(data.location);
@@ -55,14 +62,21 @@ function parseData(body) {
   }
   const locationKeys = [
     "shopNo",
+    "buildingNo",
     "floor",
+    "town",
     "area",
+    "sector",
+    "locality",
     "city",
     "state",
     "pincode",
     "nearbyLandmark",
+    "landmark",
     "latitude",
     "longitude",
+    "formattedAddress",
+    "googleMapsLocation",
   ];
   const location = { ...(data.location || {}) };
   for (const key of locationKeys) {
@@ -73,6 +87,18 @@ function parseData(body) {
         ? Number(value)
         : value;
     delete data[key];
+  }
+  if (!location.area && (location.sector || location.locality)) {
+    location.area = location.sector || location.locality;
+  }
+  if (!location.shopNo && location.buildingNo) {
+    location.shopNo = location.buildingNo;
+  }
+  if (!location.floor && location.town) {
+    location.floor = location.town;
+  }
+  if (!location.nearbyLandmark && location.landmark) {
+    location.nearbyLandmark = location.landmark;
   }
   if (Object.keys(location).length) data.location = location;
   return data;
@@ -207,8 +233,10 @@ async function saveOnboarding(req, res, next, submit) {
     vendor.onboardingType = type;
     vendor.onboardingData = form;
     vendor.onboardingFiles = mergedFiles;
-    vendor.onboardingStatus = submit ? "submitted" : "draft";
-    vendor.isProfileComplete = submit;
+    if (vendor.onboardingStatus !== "approved") {
+      vendor.onboardingStatus = submit ? "submitted" : "draft";
+    }
+    vendor.isProfileComplete = submit || Boolean(vendor.isProfileComplete);
     await vendor.save();
     saved = true;
 
@@ -219,9 +247,12 @@ async function saveOnboarding(req, res, next, submit) {
     );
     for (const oldPath of replacedPaths) removeFile(oldPath);
 
+    const isApproved = vendor.onboardingStatus === "approved";
     return res.status(200).json({
       success: true,
-      message: submit ? "Onboarding submitted for review" : "Onboarding draft saved",
+      message: isApproved
+        ? "Onboarding updated"
+        : (submit ? "Onboarding submitted for review" : "Onboarding draft saved"),
       data: {
         id: String(vendor._id),
         vendorId: String(vendor._id),

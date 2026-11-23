@@ -2,32 +2,31 @@ const express = require("express");
 const router = express.Router();
 const businessTypeController = require("./businessType.controller");
 const { verifyAdmin } = require("../../../../middleware/adminAuth.middleware");
-
 const upload = require("../../../../middleware/upload.middleware");
 
-router.use(verifyAdmin);
+// READ ALL (No token required - available for vendor and public)
+router.get("/", businessTypeController.getAllBusinessTypes);
 
-// CREATE (File upload ke sath)
+// READ SINGLE (No token required - available for vendor and public)
+router.get("/:id", businessTypeController.getBusinessTypeById);
+
+// CREATE (File upload ke sath - Admin token required)
 router.post(
   "/",
+  verifyAdmin,
   upload.single("icon"),
   businessTypeController.createBusinessType
 );
 
-// READ ALL
-router.get("/", businessTypeController.getAllBusinessTypes);
-
-// READ SINGLE
-router.get("/:id", businessTypeController.getBusinessTypeById);
-
-// UPDATE (Agar icon badalna ho to new file bhej sakte hain)
+// UPDATE (Admin token required)
 router.put(
   "/:id",
+  verifyAdmin,
   upload.single("icon"),
   businessTypeController.updateBusinessType
 );
 
-// DELETE
-router.delete("/:id", businessTypeController.deleteBusinessType);
+// DELETE (Admin token required)
+router.delete("/:id", verifyAdmin, businessTypeController.deleteBusinessType);
 
 module.exports = router;

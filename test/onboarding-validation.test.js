@@ -242,3 +242,93 @@ test("onboarding submission rejects mismatched account numbers and missing docum
   assert.ok(result.errors.includes("aadhaarCard file is required"));
   assert.ok(result.errors.includes("storefrontPhotos file is required"));
 });
+
+test("onboarding submission accepts Figma aliases, location coordinates, and file aliases", () => {
+  const result = validateOnboardingData(
+    "mechanic",
+    {
+      vendorId: "507f1f77bcf86cd799439011",
+      businessTypeId: "507f1f77bcf86cd799439012",
+      shopTypeId: "507f1f77bcf86cd799439013",
+      categoryId: "507f1f77bcf86cd799439014",
+      mechanicName: "Speedy Repairs",
+      serviceCategories: ["Brake Repair"],
+      yearsExperience: 4,
+      fullName: "Ramesh Kumar",
+      emailAddress: "ramesh@example.com",
+      mobileNumber: "+91 9876543210",
+      location: {
+        buildingNo: "Shop 4B",
+        town: "Ground Floor",
+        sector: "Sector 18",
+        city: "Noida",
+        landmark: "Near Metro",
+        latitude: 28.57,
+        longitude: 77.32,
+      },
+      panNumber: "ABCDE1234F",
+      panFullName: "Ramesh Kumar",
+      gstRegistered: false,
+      tradeLicenseNumber: "TL-123",
+      bankAccountNumber: "123456789",
+      bankAccountNumberConfirm: "123456789",
+      ifscCode: "SBIN0001234",
+      accountType: "Savings",
+    },
+    { panCard: true, aadhaarCard: true, outletPhotos: true },
+    true
+  );
+
+  assert.deepEqual(result.errors, []);
+  assert.equal(result.value.garageName, "Speedy Repairs");
+  assert.equal(result.value.ownerFullName, "Ramesh Kumar");
+  assert.equal(result.value.email, "ramesh@example.com");
+  assert.equal(result.value.location.shopNo, "Shop 4B");
+  assert.equal(result.value.location.floor, "Ground Floor");
+  assert.equal(result.value.location.area, "Sector 18");
+  assert.equal(result.value.location.nearbyLandmark, "Near Metro");
+  assert.equal(result.value.location.latitude, 28.57);
+  assert.equal(result.value.location.longitude, 77.32);
+});
+
+test("approved vendor re-submitting onboarding retains status 1 (approved)", async () => {
+  const originalFindById = Vendor.findById;
+  const vendor = {
+    _id: "507f1f77bcf86cd799439011",
+    email: "vendor@example.com",
+    isEmailVerified: true,
+    status: "active",
+    onboardingType: "restaurant",
+    onboardingStatus: "approved",
+    isProfileComplete: true,
+    onboardingData: {},
+    onboardingFiles: [],
+    async save() {},
+  };
+  Vendor.findById = async () => vendor;
+
+  try {
+    const secret = process.env.JWT_SECRET || "your_metkart_jwt_secret_key";
+    const token = jwt.sign(
+      { id: vendor._id, email: vendor.email, role: "vendor" },
+      secret,
+      { expiresIn: "1h" }
+    );
+    const response = await request(
+      createApp({
+        jwtSecret: secret,
+        corsOrigin: "*",
+      })
+    )
+      .put("/api/vendor/onboarding/restaurant")
+      .set("Authorization", `Bearer ${token}`)
+      .field("vendorId", vendor._id)
+      .field("restaurantName", "Bistro Cafe");
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.data.status, 1);
+    assert.equal(vendor.onboardingStatus, "approved");
+  } finally {
+    Vendor.findById = originalFindById;
+  }
+});

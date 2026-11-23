@@ -304,8 +304,48 @@ const deleteShopType = async (req, res) => {
   }
 };
 
+// 6. GET ALL Shop Types (with optional isActive and businessTypeId filters)
+// GET /api/admin/vendor/shoptype
+const getAllShopTypes = async (req, res) => {
+  try {
+    const { isActive, businessTypeId } = req.query;
+    const filter = {};
+
+    if (businessTypeId) {
+      if (!mongoose.Types.ObjectId.isValid(businessTypeId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid businessTypeId in query params",
+        });
+      }
+      filter.businessType_id = businessTypeId;
+    }
+
+    if (isActive !== undefined) {
+      filter.isActive = isActive === "true" || isActive === true;
+    }
+
+    const shopTypes = await ShopType.find(filter)
+      .populate("businessType_id", "name desc icon isActive")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: shopTypes.length,
+      data: shopTypes,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching shop types",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createShopType,
+  getAllShopTypes,
   getShopTypesByBusinessType,
   getShopTypeById,
   updateShopType,
