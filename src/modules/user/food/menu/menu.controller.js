@@ -501,7 +501,7 @@ exports.updateMenu = asyncHandler(async (req, res) => {
       menu.products = updatedProducts;
     }
   }
-
+  // just for verifying git configuration
   if (!menu.qrCode || menu.qrCode.startsWith("data:image")) {
     const { qrCode, menuUrl } = await generateMenuQrCode(menu.restaurantId);
     menu.qrCode = qrCode;
