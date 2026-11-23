@@ -169,7 +169,8 @@ test("menu creation succeeds with products array and generates QR code & populat
     assert.equal(response.body.success, true);
     assert.equal(response.body.data.categoryName, "Chef's Signature Selections");
     assert.equal(response.body.data.totalProducts, 3);
-    assert.ok(response.body.data.qrCode.startsWith("data:image/png;base64,"));
+    assert.ok(response.body.data.qrCode.includes("qr-"));
+    assert.ok(response.body.data.qrCode.endsWith(".png"));
     assert.ok(response.body.data.menuUrl.includes(vendor._id));
     assert.equal(response.body.data.restaurant.restaurantName, "Heritage Awadh Kitchen");
     assert.equal(response.body.data.restaurant.location, "Gomti Nagar, Lucknow");
@@ -252,7 +253,8 @@ test("GET QR code specifically does not require authentication", async () => {
 
     assert.equal(response.status, 200);
     assert.equal(response.body.success, true);
-    assert.ok(response.body.qrCode.startsWith("data:image/png;base64,"));
+    assert.ok(response.body.qrCode.includes("qr-"));
+    assert.ok(response.body.qrCode.endsWith(".png"));
     assert.ok(response.body.menuUrl.includes(vendor._id));
   } finally {
     Vendor.findById = originalVendorFindById;

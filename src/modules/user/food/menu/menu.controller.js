@@ -1,6 +1,9 @@
+const fs = require("fs");
+const path = require("path");
 const mongoose = require("mongoose");
 const QRCode = require("qrcode");
 const Menu = require("./menu.model");
+const { storageDirectory } = require("./menu.upload.middleware");
 const Vendor = require("../../../vendor/auth/vendorAuth.model");
 const ApiError = require("../../../../utils/ApiError");
 const asyncHandler = require("../../../../utils/async-handler");
@@ -135,23 +138,31 @@ function parseProductsBody(body, files = []) {
 }
 
 /**
- * Generate QR code for restaurant menu
+ * Generate QR code for restaurant menu as an image file on disk
  */
 async function generateMenuQrCode(restaurantId) {
   const frontendBaseUrl = process.env.FRONTEND_URL || "https://metkart.com";
   const menuUrl = `${frontendBaseUrl}/menu/${restaurantId}`;
+  const qrFileName = `qr-${restaurantId}.png`;
+  const qrFilePath = path.join(storageDirectory, qrFileName);
 
-  const qrCodeDataUrl = await QRCode.toDataURL(menuUrl, {
-    errorCorrectionLevel: "H",
-    margin: 2,
-    width: 320,
-    color: {
-      dark: "#000000",
-      light: "#FFFFFF",
-    },
-  });
+  try {
+    fs.mkdirSync(storageDirectory, { recursive: true });
+    await QRCode.toFile(qrFilePath, menuUrl, {
+      errorCorrectionLevel: "H",
+      margin: 2,
+      width: 320,
+      color: {
+        dark: "#000000",
+        light: "#FFFFFF",
+      },
+    });
+  } catch (err) {
+    console.error("QR image generation error:", err.message);
+  }
 
-  return { menuUrl, qrCode: qrCodeDataUrl };
+  const qrCodeUrl = `/storage/restaurant-menu/${qrFileName}`;
+  return { menuUrl, qrCode: qrCodeUrl };
 }
 
 /**
@@ -268,21 +279,30 @@ exports.getMenuByRestaurantId = asyncHandler(async (req, res) => {
     isActive: true,
   }).sort({ createdAt: 1 });
 
-  const { menuUrl, qrCode } = await generateMenuQrCode(restaurantId);
+  const { menuUrl, qrCode: generatedQrCode } = await generateMenuQrCode(restaurantId);
 
   let totalDishes = 0;
-  categories.forEach((cat) => {
-    totalDishes += cat.products ? cat.products.length : 0;
+  const normalizedCategories = categories.map((cat) => {
+    const catObj = cat.toObject ? cat.toObject() : { ...cat };
+    if (!catObj.qrCode || catObj.qrCode.startsWith("data:image")) {
+      catObj.qrCode = generatedQrCode;
+      if (cat.save && cat.qrCode && cat.qrCode.startsWith("data:image")) {
+        cat.qrCode = generatedQrCode;
+        cat.save().catch(() => {});
+      }
+    }
+    totalDishes += catObj.products ? catObj.products.length : 0;
+    return catObj;
   });
 
   return res.status(200).json({
     success: true,
     restaurant: formatRestaurantInfo(vendor),
-    qrCode: categories[0]?.qrCode || qrCode,
-    menuUrl: categories[0]?.menuUrl || menuUrl,
-    totalCategories: categories.length,
+    qrCode: generatedQrCode,
+    menuUrl,
+    totalCategories: normalizedCategories.length,
     totalDishes,
-    data: categories,
+    data: normalizedCategories,
   });
 });
 
@@ -318,19 +338,26 @@ exports.getAllMenus = asyncHandler(async (req, res) => {
   return res.status(200).json({
     success: true,
     count: menus.length,
-    data: menus.map((menu) => ({
-      _id: menu._id,
-      restaurantId: menu.restaurantId?._id,
-      restaurant: formatRestaurantInfo(menu.restaurantId),
-      categoryName: menu.categoryName,
-      categoryDescription: menu.categoryDescription,
-      products: menu.products,
-      totalProducts: menu.products.length,
-      qrCode: menu.qrCode,
-      menuUrl: menu.menuUrl,
-      createdAt: menu.createdAt,
-      updatedAt: menu.updatedAt,
-    })),
+    data: menus.map((menu) => {
+      const rId = menu.restaurantId?._id || menu.restaurantId;
+      let cleanQr = menu.qrCode;
+      if (!cleanQr || cleanQr.startsWith("data:image")) {
+        cleanQr = `/storage/restaurant-menu/qr-${rId}.png`;
+      }
+      return {
+        _id: menu._id,
+        restaurantId: rId,
+        restaurant: formatRestaurantInfo(menu.restaurantId),
+        categoryName: menu.categoryName,
+        categoryDescription: menu.categoryDescription,
+        products: menu.products,
+        totalProducts: menu.products.length,
+        qrCode: cleanQr,
+        menuUrl: menu.menuUrl,
+        createdAt: menu.createdAt,
+        updatedAt: menu.updatedAt,
+      };
+    }),
   });
 });
 
@@ -355,17 +382,23 @@ exports.getMenuById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Menu not found");
   }
 
+  const rId = menu.restaurantId?._id || menu.restaurantId;
+  let cleanQr = menu.qrCode;
+  if (!cleanQr || cleanQr.startsWith("data:image")) {
+    cleanQr = `/storage/restaurant-menu/qr-${rId}.png`;
+  }
+
   return res.status(200).json({
     success: true,
     data: {
       _id: menu._id,
-      restaurantId: menu.restaurantId?._id,
+      restaurantId: rId,
       restaurant: formatRestaurantInfo(menu.restaurantId),
       categoryName: menu.categoryName,
       categoryDescription: menu.categoryDescription,
       products: menu.products,
       totalProducts: menu.products.length,
-      qrCode: menu.qrCode,
+      qrCode: cleanQr,
       menuUrl: menu.menuUrl,
       createdAt: menu.createdAt,
       updatedAt: menu.updatedAt,
@@ -391,6 +424,20 @@ exports.getRestaurantQrCode = asyncHandler(async (req, res) => {
   }
 
   const { menuUrl, qrCode } = await generateMenuQrCode(restaurantId);
+
+  if (req.query.format === "base64") {
+    const base64Data = await QRCode.toDataURL(menuUrl, {
+      errorCorrectionLevel: "H",
+      margin: 2,
+      width: 320,
+    });
+    return res.status(200).json({
+      success: true,
+      restaurant: formatRestaurantInfo(vendor),
+      menuUrl,
+      qrCode: base64Data,
+    });
+  }
 
   return res.status(200).json({
     success: true,
