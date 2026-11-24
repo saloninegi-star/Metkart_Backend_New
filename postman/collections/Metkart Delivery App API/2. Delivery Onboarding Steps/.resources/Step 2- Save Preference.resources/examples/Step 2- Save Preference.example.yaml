@@ -1,0 +1,63 @@
+$kind: http-example
+name: "Step 2: Save Preference"
+request:
+  url: "{{baseUrl}}/api/delivery/onboarding/preference"
+  method: PUT
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer {{riderToken}}
+  body:
+    type: text
+    content: |-
+      {
+        "deliveryPreference": "BOTH_DELIVERIES"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Security-Policy: "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+    Cross-Origin-Opener-Policy: same-origin
+    Cross-Origin-Resource-Policy: cross-origin
+    Origin-Agent-Cluster: ?1
+    Referrer-Policy: no-referrer
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    X-Content-Type-Options: nosniff
+    X-DNS-Prefetch-Control: off
+    X-Download-Options: noopen
+    X-Frame-Options: SAMEORIGIN
+    X-Permitted-Cross-Domain-Policies: none
+    X-XSS-Protection: "0"
+    Access-Control-Allow-Origin: "*"
+    X-Request-Id: dbce892d-188c-4972-a9a4-c339950a6ad5
+    Content-Type: application/json; charset=utf-8
+    Content-Length: "312"
+    ETag: W/"138-DwwmEAEJZtj4YVgbTUExI5LQ9rA"
+    Date: Thu, 19 Nov 2026 10:50:59 GMT
+    Connection: keep-alive
+    Keep-Alive: timeout=5
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "status": "IN_PROGRESS",
+          "currentStep": "WORK_AREA",
+          "completedSteps": [
+            "RIDE_TYPE",
+            "PREFERENCE"
+          ],
+          "canSubmit": false,
+          "phone": "7897897894",
+          "rideType": "TWO_WHEELER",
+          "deliveryPreference": "BOTH_DELIVERIES",
+          "workArea": null,
+          "vehicle": null,
+          "identity": null,
+          "selfie": null,
+          "kitNominee": null,
+          "bank": null
+        }
+      }
+order: 1000

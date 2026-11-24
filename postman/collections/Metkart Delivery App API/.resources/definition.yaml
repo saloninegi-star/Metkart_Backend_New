@@ -1,0 +1,12 @@
+$kind: collection
+description: Dedicated Rider / Delivery Boy App backend module. All routes are mounted under `/api/delivery` (and `/api/rider`). Standard baseUrl is http://localhost:3000.
+variables:
+  - key: ""
+    value: ""
+    disabled: false
+  - key: baseUrl
+    value: ""
+    disabled: false
+  - key: json_web_token_0ahw
+    secret: true
+    disabled: false

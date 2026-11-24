@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{baseUrl}}/api/delivery/ifsc/SBIN0001234"
+method: GET
+headers:
+  Authorization: Bearer {{riderToken}}
+examples: .resources/Lookup IFSC Code.resources/examples
+order: 16000

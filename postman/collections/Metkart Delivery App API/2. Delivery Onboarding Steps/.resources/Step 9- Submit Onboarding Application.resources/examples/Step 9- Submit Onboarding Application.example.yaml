@@ -1,0 +1,44 @@
+$kind: http-example
+name: "Step 9: Submit Onboarding Application"
+request:
+  url: "{{baseUrl}}/api/delivery/onboarding/submit"
+  method: POST
+  headers:
+    Authorization: Bearer {{riderToken}}
+    Idempotency-Key: "{{$guid}}"
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Security-Policy: "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+    Cross-Origin-Opener-Policy: same-origin
+    Cross-Origin-Resource-Policy: cross-origin
+    Origin-Agent-Cluster: ?1
+    Referrer-Policy: no-referrer
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    X-Content-Type-Options: nosniff
+    X-DNS-Prefetch-Control: off
+    X-Download-Options: noopen
+    X-Frame-Options: SAMEORIGIN
+    X-Permitted-Cross-Domain-Policies: none
+    X-XSS-Protection: "0"
+    Access-Control-Allow-Origin: "*"
+    X-Request-Id: 7c3f272a-3656-4637-81dd-7fb49430bef3
+    Content-Type: application/json; charset=utf-8
+    Content-Length: "128"
+    ETag: W/"80-wRTEWOq5Y/HRIpVmMuaLn8S5cUg"
+    Date: Thu, 19 Nov 2026 13:38:46 GMT
+    Connection: keep-alive
+    Keep-Alive: timeout=5
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "status": "PENDING_REVIEW",
+          "referenceNumber": "RDR-2026-000001",
+          "submittedAt": "2026-11-19T13:38:46.163Z"
+        }
+      }
+order: 1000

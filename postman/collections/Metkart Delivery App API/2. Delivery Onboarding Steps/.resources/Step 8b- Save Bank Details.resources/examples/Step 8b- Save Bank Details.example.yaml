@@ -1,0 +1,132 @@
+$kind: http-example
+name: "Step 8b: Save Bank Details"
+request:
+  url: "{{baseUrl}}/api/delivery/onboarding/bank"
+  method: PUT
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer {{riderToken}}
+  body:
+    type: text
+    content: |-
+      {
+        "accountNumber": "123456789012",
+        "confirmAccountNumber": "123456789012",
+        "ifscCode": "SBIN0001234",
+        "accountType": "SAVINGS",
+        "passbookFileId": "{{fileId_PASSBOOK}}",
+        "upiVerificationId": "{{upiVerificationId}}"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Security-Policy: "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+    Cross-Origin-Opener-Policy: same-origin
+    Cross-Origin-Resource-Policy: cross-origin
+    Origin-Agent-Cluster: ?1
+    Referrer-Policy: no-referrer
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    X-Content-Type-Options: nosniff
+    X-DNS-Prefetch-Control: off
+    X-Download-Options: noopen
+    X-Frame-Options: SAMEORIGIN
+    X-Permitted-Cross-Domain-Policies: none
+    X-XSS-Protection: "0"
+    Access-Control-Allow-Origin: "*"
+    X-Request-Id: 82c128ce-1fef-457d-99b2-a9326a1c8353
+    Content-Type: application/json; charset=utf-8
+    Content-Length: "1538"
+    ETag: W/"602-WMcfJDdypOQVBdcdDa92EAUziJ4"
+    Date: Thu, 19 Nov 2026 13:37:37 GMT
+    Connection: keep-alive
+    Keep-Alive: timeout=5
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "status": "IN_PROGRESS",
+          "currentStep": "COMPLETED",
+          "completedSteps": [
+            "RIDE_TYPE",
+            "PREFERENCE",
+            "WORK_AREA",
+            "VEHICLE",
+            "IDENTITY",
+            "SELFIE",
+            "KIT_NOMINEE",
+            "BANK"
+          ],
+          "canSubmit": true,
+          "phone": "7897897894",
+          "rideType": "TWO_WHEELER",
+          "deliveryPreference": "BOTH_DELIVERIES",
+          "workArea": {
+            "zoneId": "zone-medipally",
+            "zoneName": "Medipally and Uppal Hub (Zone 04)",
+            "vehicleType": "MOTORCYCLE",
+            "vehicleOwnership": null
+          },
+          "vehicle": {
+            "ownerName": null,
+            "vehicleNumber": "TS09EA1234",
+            "brandModel": "Hero Splendor Plus",
+            "fuelType": "PETROL",
+            "loadCapacity": null,
+            "permitType": null,
+            "evCategory": null,
+            "cycleType": null,
+            "dlNumber": "TS0920210001234",
+            "dlExpiryDate": "2030-12-31T00:00:00.000Z",
+            "dlBadge": null
+          },
+          "identity": {
+            "idType": "AADHAAR",
+            "status": "VERIFIED",
+            "fullName": "Test Rider",
+            "aadhaarMasked": "XXXX XXXX 1236"
+          },
+          "selfie": {
+            "status": "PASSED",
+            "livenessPassed": true,
+            "matchScore": 0.92
+          },
+          "kitNominee": {
+            "address": {
+              "houseNo": "Flat 402, Green Meadows",
+              "areaStreet": "Sector 4, Main Market Road, Medipally",
+              "pincode": "500098",
+              "townCity": "Hyderabad",
+              "state": "Telangana"
+            },
+            "nominee": {
+              "nomineeName": "Pooja Sharma",
+              "nomineeRelationship": "SPOUSE",
+              "nomineeDob": "1994-08-16",
+              "nomineeMobile": "9876543210",
+              "emergencyMobile": "9812345678"
+            },
+            "coverage": {
+              "medicalInr": 100000,
+              "accidentalLifeInr": 1000000
+            },
+            "kitItems": [
+              "INSULATED_BAG",
+              "TSHIRT_X2"
+            ]
+          },
+          "bank": {
+            "accountNumberMasked": "XXXXXX9012",
+            "ifscCode": "SBIN0001234",
+            "bankName": "State Bank of India",
+            "branch": "Secunderabad Main",
+            "accountType": "SAVINGS",
+            "upiId": "rider@oksbi",
+            "nameMatch": "MATCHED",
+            "verificationStatus": "VERIFIED"
+          }
+        }
+      }
+order: 1000

@@ -1,0 +1,9 @@
+$kind: http-request
+url: "{{baseUrl}}/api/delivery/uploads/download/:storageKey?expires=1700000000&signature=sig"
+method: GET
+queryParams:
+  expires: "1700000000"
+  signature: sig
+pathVariables:
+  storageKey: ""
+order: 9000

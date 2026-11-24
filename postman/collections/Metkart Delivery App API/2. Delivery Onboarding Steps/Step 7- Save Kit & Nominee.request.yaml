@@ -1,0 +1,28 @@
+$kind: http-request
+name: "Step 7: Save Kit & Nominee"
+url: "{{baseUrl}}/api/delivery/onboarding/kit-nominee"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{riderToken}}
+body:
+  type: text
+  content: |-
+    {
+      "address": {
+        "houseNo": "Flat 402, Green Meadows",
+        "areaStreet": "Sector 4, Main Market Road, Medipally",
+        "pincode": "500098",
+        "townCity": "Hyderabad",
+        "state": "Telangana"
+      },
+      "nominee": {
+        "nomineeName": "Pooja Sharma",
+        "nomineeRelationship": "SPOUSE",
+        "nomineeDob": "1994-08-16",
+        "nomineeMobile": "9876543210",
+        "emergencyMobile": "9812345678"
+      }
+    }
+examples: .resources/Step 7- Save Kit & Nominee.resources/examples
+order: 15000

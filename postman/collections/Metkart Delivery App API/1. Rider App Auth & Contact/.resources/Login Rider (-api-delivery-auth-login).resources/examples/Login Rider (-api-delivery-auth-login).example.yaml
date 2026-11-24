@@ -1,0 +1,58 @@
+$kind: http-example
+name: Login Rider (/api/delivery/auth/login)
+request:
+  url: "{{baseUrl}}/api/delivery/auth/login"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: text
+    content: |-
+      {
+        "email": "gaurav-saini@pearlorganisation.com",
+        "password": "Password123"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Security-Policy: "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+    Cross-Origin-Opener-Policy: same-origin
+    Cross-Origin-Resource-Policy: cross-origin
+    Origin-Agent-Cluster: ?1
+    Referrer-Policy: no-referrer
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    X-Content-Type-Options: nosniff
+    X-DNS-Prefetch-Control: off
+    X-Download-Options: noopen
+    X-Frame-Options: SAMEORIGIN
+    X-Permitted-Cross-Domain-Policies: none
+    X-XSS-Protection: "0"
+    Access-Control-Allow-Origin: "*"
+    X-Request-Id: 4fc084a5-1820-438c-a368-0d7b9dc70264
+    Content-Type: application/json; charset=utf-8
+    Content-Length: "541"
+    ETag: W/"21d-5t6/pgrenl0EH0qOz3ToKRwWr2E"
+    Date: Thu, 19 Nov 2026 10:37:16 GMT
+    Connection: keep-alive
+    Keep-Alive: timeout=5
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWZlZDBiNzlhYjZiZmZkYzViYmI3ZTgiLCJlbWFpbCI6ImdhdXJhdi1zYWluaUBwZWFybG9yZ2FuaXNhdGlvbi5jb20iLCJyb2xlIjoiUklERVIiLCJpYXQiOjE3OTUwODQ2MzYsImV4cCI6MTc5NTA4NTUzNn0.XQWnGzMZUv7DZrr-gfyqfpVUCh3wIcilRtWu0HqLKYU",
+          "refreshToken": "e6cda419137ad37c3a73203fa25e18dcd4d5f70cd098c40209f7fe54aba26436",
+          "user": {
+            "id": "6afed0b79ab6bffdc5bbb7e8",
+            "email": "gaurav-saini@pearlorganisation.com",
+            "role": "RIDER"
+          },
+          "onboarding": {
+            "status": "IN_PROGRESS",
+            "currentStep": "RIDE_TYPE"
+          }
+        }
+      }
+order: 1000

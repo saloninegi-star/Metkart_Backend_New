@@ -1,0 +1,19 @@
+# Use this workspace to collaborate
+workspace:
+  id: 0650b0a0-6fdc-4d68-97df-5e93d516f875
+
+localResources:
+  collections:
+    - ../docs/Metkart_Admin_Vendor.postman_collection.json
+    - ../docs/Metkart_Complete.postman_collection.json
+    - ../docs/Metkart_Rider_Onboarding.postman_collection.json
+  environments:
+    - ../docs/Metkart_Environment.postman_environment.json
+  specs:
+    - ../docs/openapi.yaml
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ../postman/collections/Metkart Delivery App API: d616503b-244a-4077-a122-f19fe4dc3a5e

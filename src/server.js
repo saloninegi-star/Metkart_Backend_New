@@ -1,11 +1,19 @@
 const { loadEnvironment } = require("./config/environment");
 const { connectDatabase } = require("./config/database");
 const { createApp } = require("./app");
+const { seedZones } = require("./modules/delivery/seeds/seedZones");
 const mongoose = require("mongoose");
 
 async function startServer() {
   const config = loadEnvironment();
   await connectDatabase(config.mongodbUri);
+
+  // Ensure default delivery zones exist in database
+  try {
+    await seedZones();
+  } catch (seedErr) {
+    console.warn("Delivery zones auto-seed warning:", seedErr.message);
+  }
 
   const app = createApp(config);
   const server = app.listen(config.port, () => {

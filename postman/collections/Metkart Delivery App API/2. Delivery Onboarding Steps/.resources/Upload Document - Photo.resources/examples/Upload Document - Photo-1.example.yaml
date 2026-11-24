@@ -1,0 +1,64 @@
+$kind: http-example
+name: Upload Document / Photo
+request:
+  url: "{{baseUrl}}/api/delivery/uploads"
+  method: POST
+  headers:
+    Authorization: Bearer {{riderToken}}
+    Idempotency-Key: "{{$guid}}"
+  body:
+    type: formdata
+    content:
+      - type: text
+        key: purpose
+        value: DL
+        disabled: false
+      - type: file
+        key: file
+        src:
+          - ""
+          - /C:/Users/Pearl-Admin/Downloads/aistudio.google.com_apps_4b0a34b3-723f-4f72-a9fc-6b1d983812d9_showPreview=true&fullscreenApplet=true (2).png
+        disabled: false
+      - type: file
+        key: ""
+        src: []
+        description: ""
+        disabled: false
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Security-Policy: "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+    Cross-Origin-Opener-Policy: same-origin
+    Cross-Origin-Resource-Policy: cross-origin
+    Origin-Agent-Cluster: ?1
+    Referrer-Policy: no-referrer
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    X-Content-Type-Options: nosniff
+    X-DNS-Prefetch-Control: off
+    X-Download-Options: noopen
+    X-Frame-Options: SAMEORIGIN
+    X-Permitted-Cross-Domain-Policies: none
+    X-XSS-Protection: "0"
+    Access-Control-Allow-Origin: "*"
+    X-Request-Id: a2475255-0818-42ed-aedb-a46a2f544b8b
+    Content-Type: application/json; charset=utf-8
+    Content-Length: "157"
+    ETag: W/"9d-rMjeI+o3bySdCdXsG497ZKUGSro"
+    Date: Thu, 19 Nov 2026 12:25:48 GMT
+    Connection: keep-alive
+    Keep-Alive: timeout=5
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "data": {
+          "fileId": "6afeeacc990651c55d4fb5cb",
+          "purpose": "DL",
+          "mimeType": "image/png",
+          "sizeBytes": 103837,
+          "createdAt": "2026-11-19T12:25:48.695Z"
+        }
+      }
+order: 2000
