@@ -137,12 +137,28 @@ function parseProductsBody(body, files = []) {
   return normalizedProducts;
 }
 
+function resolveMenuTargetUrl(targetId, req = null) {
+  if (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes("metkart.com")) {
+    return `${process.env.FRONTEND_URL.replace(/\/$/, "")}/menu/${targetId}`;
+  }
+  if (process.env.BACKEND_URL) {
+    return `${process.env.BACKEND_URL.replace(/\/$/, "")}/api/user/food/menu/${targetId}`;
+  }
+  if (req) {
+    const host = req.get("x-forwarded-host") || req.get("host");
+    const proto = req.get("x-forwarded-proto") || req.protocol || "https";
+    if (host && !host.includes("localhost") && !host.includes("127.0.0.1")) {
+      return `${proto}://${host}/api/user/food/menu/${targetId}`;
+    }
+  }
+  return `https://metkart-backend-new.onrender.com/api/user/food/menu/${targetId}`;
+}
+
 /**
  * Generate QR code for restaurant menu as an image file on disk
  */
-async function generateMenuQrCode(restaurantId) {
-  const frontendBaseUrl = process.env.FRONTEND_URL || "https://metkart.com";
-  const menuUrl = `${frontendBaseUrl}/menu/${restaurantId}`;
+async function generateMenuQrCode(restaurantId, req = null) {
+  const menuUrl = resolveMenuTargetUrl(restaurantId, req);
   const qrFileName = `qr-${restaurantId}.png`;
   const qrFilePath = path.join(storageDirectory, qrFileName);
 
@@ -208,7 +224,7 @@ exports.createOrUpdateMenu = asyncHandler(async (req, res) => {
   const products = parseProductsBody(body, req.files);
 
   // Generate QR code
-  const { menuUrl, qrCode } = await generateMenuQrCode(restaurantId);
+  const { menuUrl, qrCode } = await generateMenuQrCode(restaurantId, req);
 
   // Find if category already exists for this restaurant, or create new
   let menu = await Menu.findOne({
@@ -270,40 +286,60 @@ exports.getMenuByRestaurantId = asyncHandler(async (req, res) => {
   }
 
   const vendor = await Vendor.findById(restaurantId);
-  if (!vendor) {
-    throw new ApiError(404, "Restaurant not found with the provided restaurant ID");
+  if (vendor) {
+    const categories = await Menu.find({
+      restaurantId,
+      isActive: true,
+    }).sort({ createdAt: 1 });
+
+    const { menuUrl, qrCode: generatedQrCode } = await generateMenuQrCode(restaurantId, req);
+
+    let totalDishes = 0;
+    const normalizedCategories = categories.map((cat) => {
+      const catObj = cat.toObject ? cat.toObject() : { ...cat };
+      if (!catObj.qrCode || catObj.qrCode.startsWith("data:image")) {
+        catObj.qrCode = generatedQrCode;
+        if (cat.save && cat.qrCode && cat.qrCode.startsWith("data:image")) {
+          cat.qrCode = generatedQrCode;
+          cat.save().catch(() => { });
+        }
+      }
+      totalDishes += catObj.products ? catObj.products.length : 0;
+      return catObj;
+    });
+
+    return res.status(200).json({
+      success: true,
+      restaurant: formatRestaurantInfo(vendor),
+      qrCode: generatedQrCode,
+      menuUrl,
+      totalCategories: normalizedCategories.length,
+      totalDishes,
+      data: normalizedCategories,
+    });
   }
 
-  const categories = await Menu.find({
-    restaurantId,
-    isActive: true,
-  }).sort({ createdAt: 1 });
+  // If vendor not found directly, check if the ID passed was actually a Menu ID (_id)
+  const singleMenu = await Menu.findById(restaurantId).populate(
+    "restaurantId",
+    "email onboardingData onboardingStatus"
+  );
 
-  const { menuUrl, qrCode: generatedQrCode } = await generateMenuQrCode(restaurantId);
+  if (singleMenu && singleMenu.isActive) {
+    const rId = singleMenu.restaurantId?._id || singleMenu.restaurantId;
+    const { menuUrl, qrCode: generatedQrCode } = await generateMenuQrCode(rId, req);
+    return res.status(200).json({
+      success: true,
+      restaurant: formatRestaurantInfo(singleMenu.restaurantId),
+      qrCode: generatedQrCode || singleMenu.qrCode,
+      menuUrl: menuUrl || singleMenu.menuUrl,
+      totalCategories: 1,
+      totalDishes: singleMenu.products ? singleMenu.products.length : 0,
+      data: [singleMenu],
+    });
+  }
 
-  let totalDishes = 0;
-  const normalizedCategories = categories.map((cat) => {
-    const catObj = cat.toObject ? cat.toObject() : { ...cat };
-    if (!catObj.qrCode || catObj.qrCode.startsWith("data:image")) {
-      catObj.qrCode = generatedQrCode;
-      if (cat.save && cat.qrCode && cat.qrCode.startsWith("data:image")) {
-        cat.qrCode = generatedQrCode;
-        cat.save().catch(() => { });
-      }
-    }
-    totalDishes += catObj.products ? catObj.products.length : 0;
-    return catObj;
-  });
-
-  return res.status(200).json({
-    success: true,
-    restaurant: formatRestaurantInfo(vendor),
-    qrCode: generatedQrCode,
-    menuUrl,
-    totalCategories: normalizedCategories.length,
-    totalDishes,
-    data: normalizedCategories,
-  });
+  throw new ApiError(404, "Restaurant or Menu not found with the provided ID");
 });
 
 /**
@@ -423,7 +459,7 @@ exports.getRestaurantQrCode = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Restaurant not found");
   }
 
-  const { menuUrl, qrCode } = await generateMenuQrCode(restaurantId);
+  const { menuUrl, qrCode } = await generateMenuQrCode(restaurantId, req);
 
   if (req.query.format === "base64") {
     const base64Data = await QRCode.toDataURL(menuUrl, {
@@ -503,7 +539,7 @@ exports.updateMenu = asyncHandler(async (req, res) => {
   }
   // just for verifying git configuration
   if (!menu.qrCode || menu.qrCode.startsWith("data:image")) {
-    const { qrCode, menuUrl } = await generateMenuQrCode(menu.restaurantId);
+    const { qrCode, menuUrl } = await generateMenuQrCode(menu.restaurantId, req);
     menu.qrCode = qrCode;
     menu.menuUrl = menuUrl;
   }

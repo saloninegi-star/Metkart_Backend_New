@@ -1,4 +1,5 @@
 const express = require("express");
+const fs = require("fs");
 const cors = require("cors");
 const helmet = require("helmet");
 const path = require("path");
@@ -75,6 +76,33 @@ function createApp(config) {
 
   // Static folder to serve uploaded icon images
   app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+  // Dedicated QR code route ensuring QR codes always point to live API even on ephemeral host
+  app.get("/storage/restaurant-menu/qr-:restaurantId.png", async (req, res, next) => {
+    try {
+      const { restaurantId } = req.params;
+      const QRCode = require("qrcode");
+      const storageDir = path.join(process.cwd(), "storage", "restaurant-menu");
+      const filePath = path.join(storageDir, `qr-${restaurantId}.png`);
+      const host = req.get("x-forwarded-host") || req.get("host") || "metkart-backend-new.onrender.com";
+      const proto = req.get("x-forwarded-proto") || req.protocol || "https";
+      const targetUrl = (host && !host.includes("localhost") && !host.includes("127.0.0.1"))
+        ? `${proto}://${host}/api/user/food/menu/${restaurantId}`
+        : `https://metkart-backend-new.onrender.com/api/user/food/menu/${restaurantId}`;
+
+      fs.mkdirSync(storageDir, { recursive: true });
+      await QRCode.toFile(filePath, targetUrl, {
+        errorCorrectionLevel: "H",
+        margin: 2,
+        width: 320,
+        color: { dark: "#000000", light: "#FFFFFF" },
+      });
+      return res.sendFile(filePath);
+    } catch (err) {
+      return next(err);
+    }
+  });
+
   app.use("/storage", express.static(path.join(process.cwd(), "storage")));
 
   // Health route
