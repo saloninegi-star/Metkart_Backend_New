@@ -224,7 +224,7 @@ exports.createOrUpdateMenu = asyncHandler(async (req, res) => {
   const products = parseProductsBody(body, req.files);
 
   // Generate QR code
-  const { menuUrl, qrCode } = await generateMenuQrCode(restaurantId, req);
+  const { menuUrl, qrCode } = await generateMenuQrCode(restaurantId);
 
   // Find if category already exists for this restaurant, or create new
   let menu = await Menu.findOne({
@@ -292,7 +292,7 @@ exports.getMenuByRestaurantId = asyncHandler(async (req, res) => {
       isActive: true,
     }).sort({ createdAt: 1 });
 
-    const { menuUrl, qrCode: generatedQrCode } = await generateMenuQrCode(restaurantId, req);
+    const { menuUrl, qrCode: generatedQrCode } = await generateMenuQrCode(restaurantId);
 
     let totalDishes = 0;
     const normalizedCategories = categories.map((cat) => {
@@ -327,12 +327,11 @@ exports.getMenuByRestaurantId = asyncHandler(async (req, res) => {
 
   if (singleMenu && singleMenu.isActive) {
     const rId = singleMenu.restaurantId?._id || singleMenu.restaurantId;
-    const { menuUrl, qrCode: generatedQrCode } = await generateMenuQrCode(rId, req);
     return res.status(200).json({
       success: true,
       restaurant: formatRestaurantInfo(singleMenu.restaurantId),
-      qrCode: generatedQrCode || singleMenu.qrCode,
-      menuUrl: menuUrl || singleMenu.menuUrl,
+      qrCode: singleMenu.qrCode,
+      menuUrl: singleMenu.menuUrl,
       totalCategories: 1,
       totalDishes: singleMenu.products ? singleMenu.products.length : 0,
       data: [singleMenu],
@@ -459,7 +458,7 @@ exports.getRestaurantQrCode = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Restaurant not found");
   }
 
-  const { menuUrl, qrCode } = await generateMenuQrCode(restaurantId, req);
+  const { menuUrl, qrCode } = await generateMenuQrCode(restaurantId);
 
   if (req.query.format === "base64") {
     const base64Data = await QRCode.toDataURL(menuUrl, {
@@ -539,7 +538,7 @@ exports.updateMenu = asyncHandler(async (req, res) => {
   }
   // just for verifying git configuration
   if (!menu.qrCode || menu.qrCode.startsWith("data:image")) {
-    const { qrCode, menuUrl } = await generateMenuQrCode(menu.restaurantId, req);
+    const { qrCode, menuUrl } = await generateMenuQrCode(menu.restaurantId);
     menu.qrCode = qrCode;
     menu.menuUrl = menuUrl;
   }
