@@ -2,7 +2,10 @@ const crypto = require("crypto");
 const fs = require("fs");
 const multer = require("multer");
 const path = require("path");
-const { allowedFileFields } = require("../modules/vendor/onboarding/onboarding.validation");
+const {
+  allowedFileFields,
+  extendedFileFields = allowedFileFields,
+} = require("../modules/vendor/onboarding/onboarding.validation");
 
 const storageDirectory = path.resolve(process.cwd(), "storage", "vendor-onboarding");
 const supportedMimeTypes = new Map([
@@ -29,10 +32,10 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024,
-    files: 15,
-    fields: 30,
-    fieldSize: 10 * 1024,
+    fileSize: 10 * 1024 * 1024,
+    files: 25,
+    fields: 50,
+    fieldSize: 50 * 1024,
   },
   fileFilter(req, file, callback) {
     if (!supportedMimeTypes.has(file.mimetype)) {
@@ -44,9 +47,9 @@ const upload = multer({
   },
 });
 
-const fields = allowedFileFields.map((name) => ({
+const fields = (extendedFileFields || allowedFileFields).map((name) => ({
   name,
-  maxCount: name === "storefrontPhotos" ? 10 : 1,
+  maxCount: ["storefrontPhotos", "outletPhotos", "menuCard", "menuPhotos"].includes(name) ? 10 : 1,
 }));
 
 module.exports = {

@@ -13,12 +13,9 @@ const app = createApp({
   corsOrigin: "*",
 });
 
-test("vendor product category CRUD routes require an admin token", async () => {
+test("vendor product category mutation routes require an admin token", async () => {
   const routes = [
-    ["get", "/api/admin/vendor/productcategory"],
     ["post", "/api/admin/vendor/productcategory/507f1f77bcf86cd799439011"],
-    ["get", "/api/admin/vendor/productcategory/by-shoptype/507f1f77bcf86cd799439011"],
-    ["get", "/api/admin/vendor/productcategory/detail/507f1f77bcf86cd799439011"],
     ["put", "/api/admin/vendor/productcategory/detail/507f1f77bcf86cd799439011"],
     ["delete", "/api/admin/vendor/productcategory/detail/507f1f77bcf86cd799439011"],
   ];
@@ -28,6 +25,22 @@ test("vendor product category CRUD routes require an admin token", async () => {
       productCategoryName: "Grains",
     });
     assert.equal(response.status, 401, `${method.toUpperCase()} ${route}`);
+  }
+});
+
+test("vendor product category GET routes do NOT require a token", async () => {
+  const originalFind = ProductCategory.find;
+  ProductCategory.find = () => ({
+    populate: () => ({
+      sort: async () => [],
+    }),
+  });
+
+  try {
+    const res = await request(app).get("/api/admin/vendor/productcategory");
+    assert.equal(res.status, 200);
+  } finally {
+    ProductCategory.find = originalFind;
   }
 });
 

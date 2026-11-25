@@ -4,7 +4,19 @@ const shopTypeController = require("./shopType.controller");
 const upload = require("../../../../middleware/upload.middleware");
 const { verifyAdmin } = require("../../../../middleware/adminAuth.middleware");
 
-// 1. CREATE: businessTypeId URL params mein aayegi
+// 1. GET ALL Shop Types (No token required - available for vendor and public)
+router.get("/", shopTypeController.getAllShopTypes);
+
+// 2. GET ALL by Business Type ID (Params se - No token required)
+router.get(
+  "/by-business/:businessTypeId",
+  shopTypeController.getShopTypesByBusinessType
+);
+
+// 3. GET SINGLE Shop Type by its ID (No token required)
+router.get("/:id", shopTypeController.getShopTypeById);
+
+// 4. CREATE: businessTypeId URL params mein aayegi (Requires Admin token)
 router.post(
   "/:businessTypeId",
   verifyAdmin,
@@ -12,16 +24,7 @@ router.post(
   shopTypeController.createShopType
 );
 
-// 2. GET ALL by Business Type ID (Params se)
-router.get(
-  "/by-business/:businessTypeId",
-  shopTypeController.getShopTypesByBusinessType
-);
-
-// 3. GET SINGLE Shop Type by its ID
-router.get("/:id", verifyAdmin, shopTypeController.getShopTypeById);
-
-// 4. UPDATE Shop Type by ID
+// 5. UPDATE Shop Type by ID (Requires Admin token)
 router.put(
   "/:id",
   verifyAdmin,
@@ -29,7 +32,7 @@ router.put(
   shopTypeController.updateShopType
 );
 
-// 5. DELETE Shop Type by ID
+// 6. DELETE Shop Type by ID (Requires Admin token)
 router.delete("/:id", verifyAdmin, shopTypeController.deleteShopType);
 
 module.exports = router;

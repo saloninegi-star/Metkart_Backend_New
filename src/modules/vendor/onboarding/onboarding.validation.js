@@ -6,21 +6,30 @@ const sharedKeys = [
   "shopTypeId",
   "categoryId",
   "ownerFullName",
+  "fullName",
   "email",
+  "emailAddress",
   "mobileNumber",
   "whatsappUpdates",
   "primaryContactSameAsOwner",
   "primaryContactNumber",
   "location",
   "shopNo",
+  "buildingNo",
   "floor",
+  "town",
   "area",
+  "sector",
+  "locality",
   "city",
   "state",
   "pincode",
   "nearbyLandmark",
+  "landmark",
   "latitude",
   "longitude",
+  "formattedAddress",
+  "googleMapsLocation",
   "panNumber",
   "panFullName",
   "gstRegistered",
@@ -41,17 +50,17 @@ const roleSchemas = {
     businessName: "shopkeeperName",
   },
   restaurant: {
-    keys: ["restaurantName", "cuisineTypes", "fssaiNumber"],
+    keys: ["restaurantName", "cuisineTypes", "fssaiNumber", "fssaiLicenseNumber"],
     required: ["restaurantName", "cuisineTypes", "fssaiNumber"],
     businessName: "restaurantName",
   },
   mechanic: {
-    keys: ["garageName", "serviceCategories", "yearsExperience"],
+    keys: ["garageName", "mechanicName", "serviceCategories", "yearsExperience"],
     required: ["garageName", "serviceCategories", "yearsExperience"],
     businessName: "garageName",
   },
   scrapVendor: {
-    keys: ["businessName", "scrapCategories", "pickupAvailable"],
+    keys: ["businessName", "scrapVendorName", "scrapCategories", "pickupAvailable"],
     required: ["businessName", "scrapCategories", "pickupAvailable"],
     businessName: "businessName",
   },
@@ -63,6 +72,16 @@ const allowedFileFields = [
   "gstCertificate",
   "tradeLicense",
   "bankProof",
+];
+
+const extendedFileFields = [
+  ...allowedFileFields,
+  "fssaiCertificate",
+  "fssaiLicense",
+  "menuCard",
+  "menuPhotos",
+  "outletPhotos",
+  "cancelledCheque",
 ];
 
 const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -112,14 +131,21 @@ function validateOnboardingData(type, data, files, requireComplete) {
       } else {
         const locationKeys = new Set([
           "shopNo",
+          "buildingNo",
           "floor",
+          "town",
           "area",
+          "sector",
+          "locality",
           "city",
           "state",
           "pincode",
           "nearbyLandmark",
+          "landmark",
           "latitude",
           "longitude",
+          "formattedAddress",
+          "googleMapsLocation",
         ]);
         const unknownLocationKeys = Object.keys(fieldValue).filter(
           (locationKey) => !locationKeys.has(locationKey)
@@ -145,6 +171,18 @@ function validateOnboardingData(type, data, files, requireComplete) {
           } else {
             errors.push(`location.${locationKey} must be a string`);
           }
+        }
+        if (!value.location.area && (value.location.sector || value.location.locality)) {
+          value.location.area = value.location.sector || value.location.locality;
+        }
+        if (!value.location.shopNo && value.location.buildingNo) {
+          value.location.shopNo = value.location.buildingNo;
+        }
+        if (!value.location.floor && value.location.town) {
+          value.location.floor = value.location.town;
+        }
+        if (!value.location.nearbyLandmark && value.location.landmark) {
+          value.location.nearbyLandmark = value.location.landmark;
         }
       }
     } else if (["cuisineTypes", "serviceCategories", "scrapCategories"].includes(key)) {
@@ -191,6 +229,28 @@ function validateOnboardingData(type, data, files, requireComplete) {
       value[key] = String(fieldValue).trim();
     }
   }
+
+  if (value.fullName && !value.ownerFullName) {
+    value.ownerFullName = value.fullName;
+  }
+  if (value.emailAddress && !value.email) {
+    value.email = value.emailAddress;
+  }
+  if (type === "mechanic" && value.mechanicName && !value.garageName) {
+    value.garageName = value.mechanicName;
+  }
+  if (type === "scrapVendor" && value.scrapVendorName && !value.businessName) {
+    value.businessName = value.scrapVendorName;
+  }
+  if (type === "restaurant" && value.fssaiLicenseNumber && !value.fssaiNumber) {
+    value.fssaiNumber = value.fssaiLicenseNumber;
+  }
+
+  const normalizedFiles = { ...(files || {}) };
+  if (normalizedFiles.outletPhotos) normalizedFiles.storefrontPhotos = true;
+  if (normalizedFiles.cancelledCheque) normalizedFiles.bankProof = true;
+  if (normalizedFiles.fssaiLicense) normalizedFiles.fssaiCertificate = true;
+  if (normalizedFiles.menuPhotos) normalizedFiles.menuCard = true;
 
   if (value.email && !validEmail.test(value.email)) {
     errors.push("email must be a valid email address");
@@ -256,12 +316,12 @@ function validateOnboardingData(type, data, files, requireComplete) {
       for (const key of ["gstNumber", "gstFullName", "registeredBusinessAddress"]) {
         if (!value[key]) errors.push(`${key} is required when GST is registered`);
       }
-      if (!files.gstCertificate) errors.push("gstCertificate file is required");
-    } else if (!value.tradeLicenseNumber && !files.tradeLicense) {
+      if (!normalizedFiles.gstCertificate) errors.push("gstCertificate file is required");
+    } else if (!value.tradeLicenseNumber && !normalizedFiles.tradeLicense) {
       errors.push("tradeLicenseNumber or tradeLicense file is required when GST is not registered");
     }
     for (const key of ["panCard", "aadhaarCard", "storefrontPhotos"]) {
-      if (!files[key]) errors.push(`${key} file is required`);
+      if (!normalizedFiles[key]) errors.push(`${key} file is required`);
     }
     for (const key of ["cuisineTypes", "serviceCategories", "scrapCategories"]) {
       if (value[key] && value[key].length === 0) {
@@ -284,6 +344,7 @@ function validateOnboardingData(type, data, files, requireComplete) {
 
 module.exports = {
   allowedFileFields,
+  extendedFileFields,
   roleSchemas,
   validateOnboardingData,
 };

@@ -3,13 +3,23 @@ const { verifyAdmin } = require("../../../../middleware/adminAuth.middleware");
 const controller = require("./productCategory.controller");
 
 const router = express.Router();
-router.use(verifyAdmin);
 
+// READ ALL (No token required - available for vendor and public)
 router.get("/", controller.getAllProductCategories);
+
+// READ BY SHOP TYPE (No token required - available for vendor and public)
 router.get("/by-shoptype/:shopTypeId", controller.getProductCategoriesByShopType);
-router.post("/:shopTypeId", controller.createProductCategory);
+
+// READ DETAIL BY ID (No token required)
 router.get("/detail/:id", controller.getProductCategoryById);
-router.put("/detail/:id", controller.updateProductCategory);
-router.delete("/detail/:id", controller.deleteProductCategory);
+
+// CREATE (Admin token required)
+router.post("/:shopTypeId", verifyAdmin, controller.createProductCategory);
+
+// UPDATE (Admin token required)
+router.put("/detail/:id", verifyAdmin, controller.updateProductCategory);
+
+// DELETE (Admin token required)
+router.delete("/detail/:id", verifyAdmin, controller.deleteProductCategory);
 
 module.exports = router;

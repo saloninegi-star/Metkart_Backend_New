@@ -37,6 +37,8 @@ const vendorProfileRoutes = require("./modules/vendor/profile/profile.routes");
 // ==========================================
 const userAuthRoutes = require("./modules/user/auth/userAuth.router");
 const createOrderRoutes = require("./modules/user/orders/orders.routes");
+const createDiningRoutes = require("./modules/user/food/dinning/dining.routes");
+const createMenuRoutes = require("./modules/user/food/menu/menu.routes");
 
 // ==========================================
 // Delivery / Rider App Routes
@@ -73,6 +75,7 @@ function createApp(config) {
 
   // Static folder to serve uploaded icon images
   app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+  app.use("/storage", express.static(path.join(process.cwd(), "storage")));
 
   // Health route
   app.use("/health", healthRoutes);
@@ -141,13 +144,20 @@ function createApp(config) {
   app.use("/api/vendor/onboarding", vendorOnboardingRoutes);
   app.use("/api/vendor/products", vendorProductRoutes);
   app.use("/api/vendor/profile", vendorProfileRoutes);
+  app.use("/api/vendor/businesstype", businessTypeRoutes);
+  app.use("/api/vendor/shoptype", shopTypeVendorRoutes);
+  app.use("/api/vendor/productcategory", productCategoryRoutes);
+  app.use("/api/vendor/menu", createMenuRoutes(config));
 
-  // ==========================================
+  // ==========================================  
   // User Authentication Routes Mounted Here
   // ==========================================
   app.use("/api/user/auth", userAuthRoutes);
   app.use("/api/user/orders", createOrderRoutes(config));
   app.use("/api/user/grocery/cart", createGroceryCartRoutes(config));
+  app.use("/api/user/food/dining", createDiningRoutes(config));
+  app.use("/api/user/food/dinning", createDiningRoutes(config));
+  app.use("/api/user/food/menu", createMenuRoutes(config));
 
   app.get(
     "/api/v1/user-app/me",
