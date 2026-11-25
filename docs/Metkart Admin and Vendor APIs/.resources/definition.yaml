@@ -1,0 +1,18 @@
+$kind: collection
+description: Importable Postman collection for the admin and vendor routes mounted in src/app.js.
+variables:
+  baseUrl: http://localhost:3001
+  adminToken: ""
+  vendorToken: ""
+  onboardingType: shopkeeper
+  vendorId: ""
+  businessTypeId: ""
+  shopTypeId: ""
+  categoryId: ""
+  productId: ""
+  id: ""
+  filename: ""
+auth:
+  - id: ""
+    type: noauth
+    name: No Auth

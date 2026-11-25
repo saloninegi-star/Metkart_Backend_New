@@ -1,0 +1,15 @@
+$kind: http-request
+description: Requests a login OTP for an existing verified user email.
+url: "{{baseUrl}}/api/user/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "rahul@example.com"
+    }
+auth:
+  type: noauth
+order: 2000

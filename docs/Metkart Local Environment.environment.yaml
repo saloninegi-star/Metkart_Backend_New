@@ -1,0 +1,32 @@
+name: Metkart Local Environment
+values:
+  - key: baseUrl
+    value: 'http://localhost:3001'
+  - key: adminToken
+    value: ''
+  - key: vendorToken
+    value: ''
+  - key: userToken
+    value: ''
+  - key: v1Token
+    value: ''
+  - key: userId
+    value: ''
+  - key: productId
+    value: ''
+  - key: orderId
+    value: ''
+  - key: vendorId
+    value: ''
+  - key: onboardingType
+    value: shopkeeper
+  - key: businessTypeId
+    value: ''
+  - key: shopTypeId
+    value: ''
+  - key: categoryId
+    value: ''
+  - key: id
+    value: ''
+  - key: filename
+    value: ''

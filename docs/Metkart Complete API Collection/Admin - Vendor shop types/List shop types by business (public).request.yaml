@@ -1,0 +1,9 @@
+$kind: http-request
+description: Public endpoint.
+url: "{{baseUrl}}/api/admin/vendor/shoptype/by-business/{{businessTypeId}}"
+method: GET
+queryParams:
+  isActive: "true"
+auth:
+  type: noauth
+order: 2000

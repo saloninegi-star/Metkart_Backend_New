@@ -1,0 +1,10 @@
+$kind: http-request
+name: Get Vendor Profile (/vendor/me)
+description: Legacy endpoint authorized only for accounts with vendor role.
+url: "{{baseUrl}}/api/v1/vendor/me"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{v1Token}}"
+order: 5000

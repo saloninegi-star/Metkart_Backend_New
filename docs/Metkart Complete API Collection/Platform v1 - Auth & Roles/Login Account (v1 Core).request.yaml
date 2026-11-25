@@ -1,0 +1,22 @@
+$kind: http-request
+description: Authenticates with email and password, returning JWT token. Saves token as v1Token.
+url: "{{baseUrl}}/api/v1/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "asha@example.com",
+      "password": "ChangeMe123!"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const body = pm.response.json();
+      if (body.token) pm.environment.set("v1Token", body.token);
+    language: text/javascript
+order: 2000

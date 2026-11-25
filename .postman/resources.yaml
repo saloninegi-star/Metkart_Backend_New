@@ -5,15 +5,27 @@ workspace:
 localResources:
   collections:
     - ../docs/Metkart_Admin_Vendor.postman_collection.json
-    - ../docs/Metkart_Complete.postman_collection.json
-    - ../docs/Metkart_Rider_Onboarding.postman_collection.json
+    - ../docs/Metkart Admin and Vendor APIs
+    - ../docs/Metkart Complete API Collection
   environments:
-    - ../docs/Metkart_Environment.postman_environment.json
+    - ../docs/Metkart Local Environment.environment.yaml
   specs:
     - ../docs/openapi.yaml
+    - ../postman/specs/hello/hello.json
+    - ../postman/specs/Metkart Delivery APIs/Metkart Delivery APIs.json
 
 # Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
 
 cloudResources:
   collections:
     ../postman/collections/Metkart Delivery App API: d616503b-244a-4077-a122-f19fe4dc3a5e
+    ../postman/collections/Bummps Dating App - Spotify Integration API: 254f4018-b750-40d3-8dda-69d062ce5d4f
+    ../postman/collections/DatingApp API: 3cbe2ef7-c9b1-4c96-855e-5da5d1d10abe
+    ../postman/collections/Bummps_Community_Polls_API: 768e6741-128b-46d0-b52b-c77cbee27d23
+    ../postman/collections/Clean7 - Billing Module: 296db3f0-0516-40c3-a7e6-8c34e0b6ece5
+    ../postman/collections/Clean7 - Customer Location & Branch Filtering: b8cd99b5-265b-46ef-8719-17d88590b1d5
+    ../postman/collections/Clean7 - Frontend Integration (Customer Location & Branch Filter: ec027c62-d5dd-4e5e-aa98-b1785f80b5d1
+resourceNameMappings:
+  specs:
+    - ../postman/specs/hello/hello.json: hello
+    - ../postman/specs/Metkart Delivery APIs/Metkart Delivery APIs.json: Metkart Delivery APIs

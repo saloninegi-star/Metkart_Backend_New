@@ -1,0 +1,11 @@
+$kind: http-request
+description: admin authenticated endpoint.
+url: "{{baseUrl}}/api/admin/vendor/productcategory/by-shoptype/{{shopTypeId}}"
+method: GET
+queryParams:
+  isActive: "true"
+auth:
+  type: bearer
+  credentials:
+    token: "{{adminToken}}"
+order: 2000

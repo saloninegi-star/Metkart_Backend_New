@@ -1,0 +1,42 @@
+$kind: http-request
+description: "multipart/form-data. Fields: title, category, description, weightVolume, price, availableQuantity, optional expiryDate and status. Up to 10 JPEG/PNG/WEBP images; published products need at least 3."
+url: "{{baseUrl}}/api/vendor/products"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: title
+      value: Organic Apples
+    - type: text
+      key: category
+      value: Fresh Produce
+    - type: text
+      key: description
+      value: Fresh apples
+    - type: text
+      key: weightVolume
+      value: 1 kg
+    - type: text
+      key: price
+      value: "5.99"
+    - type: text
+      key: availableQuantity
+      value: "25"
+    - type: text
+      key: status
+      value: draft
+    - type: file
+      key: images
+      src: []
+    - type: file
+      key: images
+      src: []
+    - type: file
+      key: images
+      src: []
+auth:
+  type: bearer
+  credentials:
+    token: "{{vendorToken}}"
+order: 2000

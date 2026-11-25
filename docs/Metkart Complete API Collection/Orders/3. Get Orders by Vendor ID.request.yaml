@@ -1,0 +1,7 @@
+$kind: http-request
+description: Retrieves all orders containing products belonging to the specified vendorId. Does NOT require admin token.
+url: "{{baseUrl}}/api/user/orders/vendor/{{vendorId}}"
+method: GET
+auth:
+  type: noauth
+order: 3000

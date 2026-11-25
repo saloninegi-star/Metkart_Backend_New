@@ -1,0 +1,19 @@
+$kind: http-request
+description: Fields depend on onboarding type. Supported fields include ownerFullName, mobileNumber, location and the type-specific business name.
+url: "{{baseUrl}}/api/vendor/profile"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "ownerFullName": "Asha Kumar",
+      "shopkeeperName": "Asha General Store",
+      "mobileNumber": "+1-555-0100"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{vendorToken}}"
+order: 3000

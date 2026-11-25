@@ -39,8 +39,8 @@ function determineCurrentStep(completedSteps = []) {
 }
 
 function generateOtp() {
-  // If SMTP credentials are configured, generate a real random 6-digit OTP
-  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+  // If SMTP credentials or Brevo fallback API key are configured, generate a real random 6-digit OTP
+  if ((process.env.SMTP_USER && process.env.SMTP_PASS) || process.env.BREVO_API_KEY) {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
   if (deliveryEnv.PROVIDER_MODE === "mock") {

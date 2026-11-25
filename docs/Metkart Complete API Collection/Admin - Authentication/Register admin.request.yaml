@@ -1,0 +1,24 @@
+$kind: http-request
+description: Creates an admin account. Save the returned token as adminToken.
+url: "{{baseUrl}}/api/admin/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Admin Name",
+      "email": "admin@example.com",
+      "password": "ChangeMe123!",
+      "role": "admin"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const body = pm.response.json();
+      if (body.token) pm.environment.set('adminToken', body.token);
+    language: text/javascript
+order: 1000

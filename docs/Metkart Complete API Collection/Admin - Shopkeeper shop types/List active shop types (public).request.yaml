@@ -1,0 +1,7 @@
+$kind: http-request
+description: Public endpoint.
+url: "{{baseUrl}}/api/admin/shopkeeper/shoptype/active"
+method: GET
+auth:
+  type: noauth
+order: 1000

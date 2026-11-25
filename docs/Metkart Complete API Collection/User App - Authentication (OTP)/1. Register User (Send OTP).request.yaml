@@ -1,0 +1,18 @@
+$kind: http-request
+description: Registers a new user profile with full name, email, mobile, and address. Sends a 6-digit OTP to the email. Account remains unverified until OTP verification.
+url: "{{baseUrl}}/api/user/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Rahul Sharma",
+      "email": "rahul@example.com",
+      "mobileNumber": "+919876543210",
+      "currentAddress": "123 Market Street, Sector 15, Gurgaon, Haryana"
+    }
+auth:
+  type: noauth
+order: 1000

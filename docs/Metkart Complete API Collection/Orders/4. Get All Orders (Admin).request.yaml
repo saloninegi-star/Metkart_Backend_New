@@ -1,0 +1,9 @@
+$kind: http-request
+description: Retrieves all platform orders with optional pagination (page, limit) and status filtering. Requires Admin Bearer token.
+url: "{{baseUrl}}/api/user/orders/all"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{adminToken}}"
+order: 4000

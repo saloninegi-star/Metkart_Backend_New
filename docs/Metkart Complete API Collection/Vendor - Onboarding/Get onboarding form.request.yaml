@@ -1,0 +1,9 @@
+$kind: http-request
+description: "onboardingType: shopkeeper, restaurant, mechanic, or scrapVendor."
+url: "{{baseUrl}}/api/vendor/onboarding/{{onboardingType}}"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{vendorToken}}"
+order: 1000

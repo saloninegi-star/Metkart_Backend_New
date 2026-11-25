@@ -1,0 +1,17 @@
+$kind: http-request
+description: Use action=reject or action=block with a non-empty reason when declining or blocking.
+url: "{{baseUrl}}/api/admin/vendor/onboarding/{{vendorId}}/status"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "action": "approve"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{adminToken}}"
+order: 2000
