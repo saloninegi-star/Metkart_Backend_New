@@ -1,0 +1,22 @@
+$kind: collection
+description: "Complete, fully-featured Postman collection for all Metkart backend endpoints: Health, User App (OTP Auth & Orders), Admin (Auth, Shopkeeper, Vendor Settings, Onboarding Approvals), Vendor (OTP Auth, Dashboard, Profile, Onboarding, Products), and Platform v1 APIs."
+variables:
+  baseUrl: http://localhost:3001
+  adminToken: ""
+  vendorToken: ""
+  userToken: ""
+  v1Token: ""
+  userId: ""
+  productId: ""
+  orderId: ""
+  vendorId: ""
+  onboardingType: shopkeeper
+  businessTypeId: ""
+  shopTypeId: ""
+  categoryId: ""
+  id: ""
+  filename: ""
+auth:
+  - id: ""
+    type: noauth
+    name: No Auth

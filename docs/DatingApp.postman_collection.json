@@ -1,0 +1,6014 @@
+{
+  "info": {
+    "_postman_id": "col-1795511677155-8grqxc",
+    "name": "DatingApp API",
+    "description": "Postman collection generated from the Express route declarations and app.js mounts. Set baseUrl to the server origin (default http://localhost:5000). Replace path variables and request bodies with valid project data. Routes labelled UNMOUNTED are declared but are not currently reachable because app.js does not mount them. Socket.IO events are not HTTP APIs and are not included.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication & Profile",
+      "item": [
+        {
+          "name": "post /api/auth/register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Joey Tribbiani",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "email",
+                  "value": "joeytribyaniofficial@gmail.com",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "password",
+                  "value": "123456",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "phone",
+                  "value": "9876543210",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "gender",
+                  "value": "male",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "interestedIn",
+                  "value": "female",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "age",
+                  "value": "24",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "bio",
+                  "value": "hello world!",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "jobTitle",
+                  "value": "",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "company",
+                  "value": "",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "school",
+                  "value": "",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "livingIn",
+                  "value": "",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "longitude",
+                  "value": "0",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "latitude",
+                  "value": "0",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "profilePic",
+                  "type": "file",
+                  "src": [
+                    "/C:/Users/Pearl-Admin/Downloads/ChatGPT Image Apr 20, 2026, 02_47_25 PM.png"
+                  ],
+                  "description": "Select a local file in Postman."
+                },
+                {
+                  "key": "additionalPhotos",
+                  "type": "file",
+                  "src": [
+                    "/C:/Users/Pearl-Admin/Downloads/cntroler-waste-m.png"
+                  ],
+                  "description": "Select a local file in Postman."
+                }
+              ]
+            },
+            "description": "Declared in routes/auth.routes.js. No bearer token required by route middleware. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields."
+          }
+        },
+        {
+          "name": "post /api/auth/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/auth.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/auth/facebook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/facebook",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "facebook"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/auth.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/auth/link-phone",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/link-phone",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "link-phone"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/auth/me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/auth/profile/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/profile/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "profile",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT. Uses multipart/form-data; select local files for file fields."
+          }
+        },
+        {
+          "name": "put /api/auth/profile",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "profile"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Example User",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "bio",
+                  "value": "Updated bio",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "profilePic",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a local file in Postman."
+                },
+                {
+                  "key": "additionalPhotos",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a local file in Postman."
+                }
+              ]
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields."
+          }
+        },
+        {
+          "name": "get /api/auth/count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "count"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "delete /api/auth/account",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/account",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "account"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "put /api/auth/deactivate",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "deactivate"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "put /api/auth/activate",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "activate"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "put /api/auth/hide",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/hide",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "hide"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "put /api/auth/unhide",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/unhide",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "unhide"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/auth/support",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/support",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "support"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/auth/support",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/support",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "support"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/auth/support/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/support/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "support",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/auth.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "forgot-password-send-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/auth/forgot-password",
+              "host": [
+                "localhost:5000"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"joeytribyaniofficial@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "verify-reset-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/auth/verify-reset-otp",
+              "host": [
+                "localhost:5000"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "verify-reset-otp"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"joeytribyaniofficial@gmail.com\",\r\n  \"otp\": \"904986\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "reset-password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/auth/reset-password",
+              "host": [
+                "localhost:5000"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "reset-password"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"joeytribyaniofficial@gmail.com\",\r\n  \"resetToken\": \"19222e5609e176f910d8b3445e0461852f2a3a3a228572f7aa5083876730e979\",\r\n  \"newPassword\": \"12345678\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "description": "Routes from routes/auth.routes.js."
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "post /api/reports/report-spam",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/report-spam",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reports",
+                "report-spam"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/report.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/reports/my-reports",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/my-reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reports",
+                "my-reports"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/report.routes.js. No bearer token required by route middleware."
+          }
+        }
+      ],
+      "description": "Routes from routes/report.routes.js."
+    },
+    {
+      "name": "Swipes",
+      "item": [
+        {
+          "name": "post /api/swipes/super-like",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/swipes/super-like",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "swipes",
+                "super-like"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/swipe.routes.js. No bearer token required by route middleware."
+          }
+        }
+      ],
+      "description": "Routes from routes/swipe.routes.js."
+    },
+    {
+      "name": "Plans & Wallet",
+      "item": [
+        {
+          "name": "get /api/plans/allplans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans/allplans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "allplans"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/plan.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/plans/wallet/create-intent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans/wallet/create-intent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "wallet",
+                "create-intent"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/plan.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/plans/wallet/verify",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans/wallet/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "wallet",
+                "verify"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/plan.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/plans/wallet",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans/wallet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "wallet"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/plan.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/plans/subscribe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans/subscribe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "subscribe"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/plan.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/plans/subscribe/verify",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans/subscribe/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "subscribe",
+                "verify"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/plan.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/plans/subscription",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans/subscription",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "subscription"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/plan.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/plans/payment-failed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans/payment-failed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "payment-failed"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/plan.routes.js. No bearer token required by route middleware."
+          }
+        }
+      ],
+      "description": "Routes from routes/plan.routes.js."
+    },
+    {
+      "name": "Matches",
+      "item": [
+        {
+          "name": "get /api/matches/feed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/matches/feed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches",
+                "feed"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/match.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/matches/filter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/matches/filter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches",
+                "filter"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/match.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/matches/pass",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/matches/pass",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches",
+                "pass"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/match.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/matches/my-matches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/matches/my-matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches",
+                "my-matches"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/match.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/matches/new-matches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/matches/new-matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches",
+                "new-matches"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/match.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/matches/like",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/matches/like",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches",
+                "like"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/match.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/matches/rewind",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/matches/rewind",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches",
+                "rewind"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/match.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/matches/who-liked-me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/matches/who-liked-me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches",
+                "who-liked-me"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/match.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/matches/who-liked-me/filter",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/matches/who-liked-me/filter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches",
+                "who-liked-me",
+                "filter"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/match.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/matches/search-likes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/matches/search-likes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches",
+                "search-likes"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/match.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/matches/boost",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/matches/boost",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches",
+                "boost"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/match.route.js. No bearer token required by route middleware."
+          }
+        }
+      ],
+      "description": "Routes from routes/match.route.js."
+    },
+    {
+      "name": "Circle & Community",
+      "item": [
+        {
+          "name": "get /api/circle/dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/circle/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "circle",
+                "dashboard"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/circle.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/circle/connect/:targetUserId",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/circle/connect/{{targetUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "circle",
+                "connect",
+                "{{targetUserId}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/circle.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/circle/events",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/circle/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "circle",
+                "events"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Example event",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "dateText",
+                  "value": "Saturday, 7 PM",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "eventDate",
+                  "value": "2026-12-01T19:00:00.000Z",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "location",
+                  "value": "Example venue",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "isExclusive",
+                  "value": "true",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a local file in Postman."
+                }
+              ]
+            },
+            "description": "Declared in routes/circle.routes.js. No bearer token required by route middleware. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields."
+          }
+        },
+        {
+          "name": "get /api/circle/events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/circle/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "circle",
+                "events"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/circle.routes.js. No bearer token required by route middleware. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields."
+          }
+        },
+        {
+          "name": "post /api/circle/discussions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/circle/discussions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "circle",
+                "discussions"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/circle.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/circle/discussions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/circle/discussions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "circle",
+                "discussions"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/circle.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/circle/discussions/category/:category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/circle/discussions/category/{{category}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "circle",
+                "discussions",
+                "category",
+                "{{category}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/circle.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/circle/discussions/search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/circle/discussions/search",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "circle",
+                "discussions",
+                "search"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/circle.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/circle/discussions/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/circle/discussions/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "circle",
+                "discussions",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/circle.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "delete /api/circle/discussions/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/circle/discussions/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "circle",
+                "discussions",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/circle.routes.js. No bearer token required by route middleware."
+          }
+        }
+      ],
+      "description": "Routes from routes/circle.routes.js."
+    },
+    {
+      "name": "User Notifications",
+      "item": [
+        {
+          "name": "get /api/notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/user.notification.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "delete /api/notifications/clear",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/clear",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "clear"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/user.notification.routes.js. Requires a bearer JWT."
+          }
+        }
+      ],
+      "description": "Routes from routes/user.notification.routes.js."
+    },
+    {
+      "name": "Admin - /api/admin",
+      "item": [
+        {
+          "name": "post /api/admin/register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "register"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/send-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/send-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "send-otp"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/verify-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/verify-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "verify-otp"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "profile"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/dashboard-stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/dashboard-stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "dashboard-stats"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/users",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users/search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/search",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "search"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users/export",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "export"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users/by-gender/:gender",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/by-gender/{{gender}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "by-gender",
+                "{{gender}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users/stats-unmatched",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/stats-unmatched",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "stats-unmatched"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users/subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/subscriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "subscriptions"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "put /api/admin/users/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "delete /api/admin/users/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "patch /api/admin/users/:id/toggle-status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/{{id}}/toggle-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "{{id}}",
+                "toggle-status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/help-requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/help-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "help-requests"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "patch /api/admin/help-requests/:id/resolve",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/help-requests/{{id}}/resolve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "help-requests",
+                "{{id}}",
+                "resolve"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/host-applications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/host-applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "host-applications"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/host-applications/:id/document",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/host-applications/{{id}}/document",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "host-applications",
+                "{{id}}",
+                "document"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "patch /api/admin/host-applications/:id/approve",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/host-applications/{{id}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "host-applications",
+                "{{id}}",
+                "approve"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "patch /api/admin/host-applications/:id/reject",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/host-applications/{{id}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "host-applications",
+                "{{id}}",
+                "reject"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        }
+      ],
+      "description": "Routes from routes/admin.routes.js. This router is mounted at both /api/admin and /api/admin/users-manage."
+    },
+    {
+      "name": "Admin - /api/admin/users-manage alias",
+      "item": [
+        {
+          "name": "post /api/admin/users-manage/register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "register"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/users-manage/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/users-manage/send-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/send-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "send-otp"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/users-manage/verify-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/verify-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "verify-otp"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users-manage/profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "profile"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users-manage/dashboard-stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/dashboard-stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "dashboard-stats"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/users-manage/users",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users-manage/users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users-manage/users/search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/users/search",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "users",
+                "search"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users-manage/users/export",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/users/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "users",
+                "export"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users-manage/users/by-gender/:gender",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/users/by-gender/{{gender}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "users",
+                "by-gender",
+                "{{gender}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users-manage/users/stats-unmatched",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/users/stats-unmatched",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "users",
+                "stats-unmatched"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users-manage/users/subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/users/subscriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "users",
+                "subscriptions"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users-manage/users/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/users/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "users",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "put /api/admin/users-manage/users/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/users/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "users",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "delete /api/admin/users-manage/users/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/users/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "users",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "patch /api/admin/users-manage/users/:id/toggle-status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/users/{{id}}/toggle-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "users",
+                "{{id}}",
+                "toggle-status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users-manage/help-requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/help-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "help-requests"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "patch /api/admin/users-manage/help-requests/:id/resolve",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/help-requests/{{id}}/resolve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "help-requests",
+                "{{id}}",
+                "resolve"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users-manage/host-applications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/host-applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "host-applications"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/users-manage/host-applications/:id/document",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/host-applications/{{id}}/document",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "host-applications",
+                "{{id}}",
+                "document"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "patch /api/admin/users-manage/host-applications/:id/approve",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/host-applications/{{id}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "host-applications",
+                "{{id}}",
+                "approve"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "patch /api/admin/users-manage/host-applications/:id/reject",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users-manage/host-applications/{{id}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users-manage",
+                "host-applications",
+                "{{id}}",
+                "reject"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.routes.js. Requires a bearer JWT."
+          }
+        }
+      ],
+      "description": "Duplicate mount of the admin router declared in app.js."
+    },
+    {
+      "name": "Admin - Plans & Transactions",
+      "item": [
+        {
+          "name": "get /api/admin/plans-manage/plans/purchased-users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans-manage/plans/purchased-users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "plans-manage",
+                "plans",
+                "purchased-users"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/adminPlan.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/admin/plans-manage/plans/analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans-manage/plans/analytics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "plans-manage",
+                "plans",
+                "analytics"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/adminPlan.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/admin/plans-manage/transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans-manage/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "plans-manage",
+                "transactions"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/adminPlan.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/admin/plans-manage/transactions/analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans-manage/transactions/analytics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "plans-manage",
+                "transactions",
+                "analytics"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/adminPlan.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/admin/plans-manage/transactions/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans-manage/transactions/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "plans-manage",
+                "transactions",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/adminPlan.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "patch /api/admin/plans-manage/plans/:id/popularity",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans-manage/plans/{{id}}/popularity",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "plans-manage",
+                "plans",
+                "{{id}}",
+                "popularity"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/adminPlan.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/admin/plans-manage/plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans-manage/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "plans-manage",
+                "plans"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/adminPlan.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/admin/plans-manage/plans",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans-manage/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "plans-manage",
+                "plans"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/adminPlan.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/admin/plans-manage/plans/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans-manage/plans/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "plans-manage",
+                "plans",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/adminPlan.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "put /api/admin/plans-manage/plans/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans-manage/plans/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "plans-manage",
+                "plans",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/adminPlan.route.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "delete /api/admin/plans-manage/plans/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans-manage/plans/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "plans-manage",
+                "plans",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/adminPlan.route.js. No bearer token required by route middleware."
+          }
+        }
+      ],
+      "description": "Routes from routes/adminPlan.route.js."
+    },
+    {
+      "name": "Admin - Match Management",
+      "item": [
+        {
+          "name": "get /api/admin/match-manage/plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/match-manage/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "match-manage",
+                "plans"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/adminMatch.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/match-manage/plans",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/match-manage/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "match-manage",
+                "plans"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/adminMatch.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "delete /api/admin/match-manage/plans/:planId",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/match-manage/plans/{{planId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "match-manage",
+                "plans",
+                "{{planId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/adminMatch.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/match-manage/user/:userId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/match-manage/user/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "match-manage",
+                "user",
+                "{{userId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/adminMatch.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "put /api/admin/match-manage/user/:userId/wallet",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/match-manage/user/{{userId}}/wallet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "match-manage",
+                "user",
+                "{{userId}}",
+                "wallet"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/adminMatch.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "put /api/admin/match-manage/user/:userId/subscription",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/match-manage/user/{{userId}}/subscription",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "match-manage",
+                "user",
+                "{{userId}}",
+                "subscription"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/adminMatch.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/match-manage/user/:userId/reset-swipes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/match-manage/user/{{userId}}/reset-swipes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "match-manage",
+                "user",
+                "{{userId}}",
+                "reset-swipes"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/adminMatch.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/match-manage/subscriptions/all",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/match-manage/subscriptions/all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "match-manage",
+                "subscriptions",
+                "all"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/adminMatch.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/match-manage/stats/platform",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/match-manage/stats/platform",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "match-manage",
+                "stats",
+                "platform"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/adminMatch.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/match-manage/match/remove",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/match-manage/match/remove",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "match-manage",
+                "match",
+                "remove"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/adminMatch.routes.js. Requires a bearer JWT."
+          }
+        }
+      ],
+      "description": "Routes from routes/adminMatch.routes.js."
+    },
+    {
+      "name": "Admin - Notifications",
+      "item": [
+        {
+          "name": "post /api/admin/notifications/send-all",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/notifications/send-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "notifications",
+                "send-all"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.notification.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/notifications/send-single",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/notifications/send-single",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "notifications",
+                "send-single"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.notification.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/notifications/schedule",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/notifications/schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "notifications",
+                "schedule"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.notification.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "post /api/admin/notifications/resend/:id",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/notifications/resend/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "notifications",
+                "resend",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.notification.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/notifications/sent-history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/notifications/sent-history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "notifications",
+                "sent-history"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.notification.routes.js. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "delete /api/admin/notifications/delete/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/notifications/delete/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "notifications",
+                "delete",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.notification.routes.js. Requires a bearer JWT."
+          }
+        }
+      ],
+      "description": "Routes from routes/admin.notification.routes.js."
+    },
+    {
+      "name": "Chats",
+      "item": [
+        {
+          "name": "get /api/chats/inbox",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chats/inbox",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chats",
+                "inbox"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/chat.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/chats/history/:chatId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chats/history/{{chatId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chats",
+                "history",
+                "{{chatId}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/chat.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/chats/matches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chats/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chats",
+                "matches"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/chat.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/chats/access/:recipientId",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chats/access/{{recipientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chats",
+                "access",
+                "{{recipientId}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/chat.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/chats/message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chats/message",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chats",
+                "message"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/chat.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "put /api/chats/read/:chatId",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chats/read/{{chatId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chats",
+                "read",
+                "{{chatId}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/chat.routes.js. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "delete /api/chats/:chatId",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chats/{{chatId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chats",
+                "{{chatId}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/chat.routes.js. No bearer token required by route middleware."
+          }
+        }
+      ],
+      "description": "Routes from routes/chat.routes.js."
+    },
+    {
+      "name": "Admin - Circle (UNMOUNTED)",
+      "item": [
+        {
+          "name": "get /api/admin/circle/events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/circle/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "circle",
+                "events"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.circle.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. Requires a bearer JWT. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields."
+          }
+        },
+        {
+          "name": "post /api/admin/circle/events",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/circle/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "circle",
+                "events"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Example event",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "dateText",
+                  "value": "Saturday, 7 PM",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "eventDate",
+                  "value": "2026-12-01T19:00:00.000Z",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "location",
+                  "value": "Example venue",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a local file in Postman."
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.circle.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. Requires a bearer JWT. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields."
+          }
+        },
+        {
+          "name": "put /api/admin/circle/events/:id",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/circle/events/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "circle",
+                "events",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Example event",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "dateText",
+                  "value": "Saturday, 7 PM",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "eventDate",
+                  "value": "2026-12-01T19:00:00.000Z",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "location",
+                  "value": "Example venue",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a local file in Postman."
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.circle.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. Requires a bearer JWT. Uses multipart/form-data; image is optional. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields."
+          }
+        },
+        {
+          "name": "delete /api/admin/circle/events/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/circle/events/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "circle",
+                "events",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.circle.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. Requires a bearer JWT. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields."
+          }
+        },
+        {
+          "name": "get /api/admin/circle/discussions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/circle/discussions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "circle",
+                "discussions"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.circle.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "delete /api/admin/circle/discussions/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/circle/discussions/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "circle",
+                "discussions",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.circle.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/circle/dashboard/stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/circle/dashboard/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "circle",
+                "dashboard",
+                "stats"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.circle.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "get /api/admin/circle/members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/circle/members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "circle",
+                "members"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.circle.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "patch /api/admin/circle/members/:id/toggle-status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/circle/members/{{id}}/toggle-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "circle",
+                "members",
+                "{{id}}",
+                "toggle-status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/admin.circle.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. Requires a bearer JWT."
+          }
+        },
+        {
+          "name": "delete /api/admin/circle/members/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/circle/members/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "circle",
+                "members",
+                "{{id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Declared in routes/admin.circle.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. Requires a bearer JWT."
+          }
+        }
+      ],
+      "description": "Routes are declared but not mounted by app.js."
+    },
+    {
+      "name": "Host (UNMOUNTED)",
+      "item": [
+        {
+          "name": "post /api/host/application-fee/create-intent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/host/application-fee/create-intent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "host",
+                "application-fee",
+                "create-intent"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/host.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/host/apply",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/host/apply",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "host",
+                "apply"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "eventConcept",
+                  "value": "Describe your proposed event",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "govIdNote",
+                  "value": "Optional note",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "paymentIntentId",
+                  "value": "REPLACE_WITH_SUCCEEDED_PAYMENT_INTENT",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "govId",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a local file in Postman."
+                }
+              ]
+            },
+            "description": "Declared in routes/host.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. No bearer token required by route middleware. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields."
+          }
+        },
+        {
+          "name": "get /api/host/status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/host/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "host",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/host.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/host/events",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/host/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "host",
+                "events"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Example event",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "dateText",
+                  "value": "Saturday, 7 PM",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "eventDate",
+                  "value": "2026-12-01T19:00:00.000Z",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "location",
+                  "value": "Example venue",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "description",
+                  "value": "Event details",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "dressCode",
+                  "value": "Smart casual",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "capacity",
+                  "value": "200",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "standardPrice",
+                  "value": "49.99",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "vipPrice",
+                  "value": "99.99",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "standardAvailable",
+                  "value": "100",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "vipAvailable",
+                  "value": "50",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a local file in Postman."
+                }
+              ]
+            },
+            "description": "Declared in routes/host.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. No bearer token required by route middleware. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields."
+          }
+        },
+        {
+          "name": "get /api/host/events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/host/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "host",
+                "events"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/host.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. No bearer token required by route middleware. Uses multipart/form-data; select local files for file fields. Uses multipart/form-data; select local files for file fields."
+          }
+        },
+        {
+          "name": "post /api/host/payout/onboard",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/host/payout/onboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "host",
+                "payout",
+                "onboard"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/host.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/host/payout/status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/host/payout/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "host",
+                "payout",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/host.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. No bearer token required by route middleware."
+          }
+        }
+      ],
+      "description": "Routes are declared but not mounted by app.js."
+    },
+    {
+      "name": "Tickets (UNMOUNTED)",
+      "item": [
+        {
+          "name": "post /api/tickets/purchase",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/purchase",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "purchase"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/ticket.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/tickets/confirm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "confirm"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/ticket.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "get /api/tickets/mine",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "mine"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Declared in routes/ticket.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. No bearer token required by route middleware."
+          }
+        },
+        {
+          "name": "post /api/tickets/validate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "validate"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Declared in routes/ticket.routes.js. NOT CURRENTLY MOUNTED in app.js; this request will return 404 until the router is mounted. No bearer token required by route middleware."
+          }
+        }
+      ],
+      "description": "Routes are declared but not mounted by app.js."
+    },
+    {
+      "name": "Stripe Webhooks",
+      "item": [
+        {
+          "name": "POST /api/plans/stripe-webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Stripe-Signature",
+                "value": "{{stripeSignature}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans/stripe-webhook",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "stripe-webhook"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{{stripeWebhookPayload}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Raw-body Stripe webhook. A valid Stripe-Signature is required; sample placeholder is not signed."
+          }
+        },
+        {
+          "name": "POST /api/webhooks/stripe/connect",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Stripe-Signature",
+                "value": "{{stripeSignature}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/webhooks/stripe/connect",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "webhooks",
+                "stripe",
+                "connect"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{{stripeWebhookPayload}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Raw-body Stripe Connect webhook. A valid Stripe-Signature is required; sample placeholder is not signed."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Story and Highlights",
+      "item": [
+        {
+          "name": "Create Story",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/stories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stories"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_0tg3}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "media",
+                  "type": "file",
+                  "src": [
+                    "/C:/Users/Pearl-Admin/Downloads/image (14).png"
+                  ]
+                },
+                {
+                  "key": "caption",
+                  "value": "hey there!",
+                  "type": "text",
+                  "disabled": false
+                },
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Story Feed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/stories/feed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stories",
+                "feed"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_12c0}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Story View",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/stories/6afb02e03149d603aard40fe/view",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stories",
+                "6afb02e03149d603aard40fe",
+                "view"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_12c3}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Story Reaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/stories/6afb02e03149d603aadd40fe/react",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stories",
+                "6afb02e03149d603aadd40fe",
+                "react"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_0o71}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"reactionType\": \"🔥\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Story",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/stories/6afb02e03149d603aadd40fe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stories",
+                "6afb02e03149d603aadd40fe"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_0o71}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Highlight",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/stories/highlights",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stories",
+                "highlights"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_12c0}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"My Adventures\",\r\n  \"coverUrl\": \"https://www.istockphoto.com/photo/lady-with-kayak-gm516449022-89003975\",\r\n  \"storyIds\": [\r\n    \"6afaf077e40ca9cbc713ff96\"\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get User Highlights",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/stories/highlights/6af2b8979caf5f8f3d96e268",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stories",
+                "highlights",
+                "6af2b8979caf5f8f3d96e268"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_12c0}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Highlight",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/stories/highlights/6af2e413b0e7719f87307673",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stories",
+                "highlights",
+                "6af2e413b0e7719f87307673"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_12c0}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "id",
+      "value": "REPLACE_WITH_ID",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "userId",
+      "value": "REPLACE_WITH_USER_ID",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "targetUserId",
+      "value": "REPLACE_WITH_TARGET_USER_ID",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "recipientId",
+      "value": "REPLACE_WITH_RECIPIENT_ID",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "chatId",
+      "value": "REPLACE_WITH_CHAT_ID",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "planId",
+      "value": "REPLACE_WITH_PLAN_ID",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "category",
+      "value": "REPLACE_WITH_CATEGORY",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "gender",
+      "value": "REPLACE_WITH_GENDER",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "stripeSignature",
+      "value": "REPLACE_WITH_VALID_STRIPE_SIGNATURE",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "stripeWebhookPayload",
+      "value": "{\"id\":\"evt_replace_me\",\"type\":\"replace.me\",\"data\":{\"object\":{}}}",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "json_web_token_1b2v",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "json_web_token_18yc",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "json_web_token_04sv",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "json_web_token_142r",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "json_web_token_16nw",
+      "value": "",
+      "type": "secret",
+      "disabled": false
+    },
+    {
+      "key": "json_web_token_0tg3",
+      "value": "",
+      "type": "secret",
+      "disabled": false
+    },
+    {
+      "key": "json_web_token_12c0",
+      "value": "",
+      "type": "secret",
+      "disabled": false
+    },
+    {
+      "key": "json_web_token_12c3",
+      "value": "",
+      "type": "secret",
+      "disabled": false
+    },
+    {
+      "key": "json_web_token_0o71",
+      "value": "",
+      "type": "secret",
+      "disabled": false
+    }
+  ]
+}

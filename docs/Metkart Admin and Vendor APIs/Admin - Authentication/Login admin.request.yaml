@@ -1,0 +1,22 @@
+$kind: http-request
+description: Returns a Bearer token and saves it as adminToken.
+url: "{{baseUrl}}/api/admin/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "admin@example.com",
+      "password": "ChangeMe123!"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const body = pm.response.json();
+      if (body.token) pm.environment.set('adminToken', body.token);
+    language: text/javascript
+order: 2000

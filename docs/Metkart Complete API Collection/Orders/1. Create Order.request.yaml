@@ -1,0 +1,26 @@
+$kind: http-request
+description: Creates a pending order for the authenticated user. Body userId must match the authenticated user. All productIds must be published products with available quantity.
+url: "{{baseUrl}}/api/user/orders"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "userId": "{{userId}}",
+      "productIds": [
+        "{{productId}}"
+      ]
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{userToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      const body = pm.response.json();
+      if (body.data && body.data._id) pm.environment.set("orderId", body.data._id);
+    language: text/javascript
+order: 1000

@@ -1,0 +1,15 @@
+$kind: http-request
+description: Generates and resends a new 6-digit verification OTP to the user email.
+url: "{{baseUrl}}/api/user/auth/resend-otp"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "rahul@example.com"
+    }
+auth:
+  type: noauth
+order: 4000

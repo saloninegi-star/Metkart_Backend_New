@@ -1,0 +1,19 @@
+$kind: http-request
+description: admin authenticated endpoint.
+url: "{{baseUrl}}/api/admin/shopkeeper/shopcategory/detail/{{id}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Fresh Produce",
+      "sortOrder": 2,
+      "isActive": true
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{adminToken}}"
+order: 5000

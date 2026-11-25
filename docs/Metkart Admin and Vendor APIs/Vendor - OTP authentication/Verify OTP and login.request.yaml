@@ -1,0 +1,22 @@
+$kind: http-request
+description: Returns a vendor token and saves it as vendorToken.
+url: "{{baseUrl}}/api/vendor/auth/verify-otp"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "vendor@example.com",
+      "otp": "123456"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const body = pm.response.json();
+      if (body.token) pm.environment.set('vendorToken', body.token);
+    language: text/javascript
+order: 3000

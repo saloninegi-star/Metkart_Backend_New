@@ -1,0 +1,78 @@
+$kind: http-request
+description: "Submit requires complete form data and required files. Other valid types: restaurant, mechanic, scrapVendor."
+url: "{{baseUrl}}/api/vendor/onboarding/{{onboardingType}}/submit"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: vendorId
+      value: "{{vendorId}}"
+    - type: text
+      key: businessTypeId
+      value: "{{businessTypeId}}"
+    - type: text
+      key: shopTypeId
+      value: "{{shopTypeId}}"
+    - type: text
+      key: categoryId
+      value: "{{categoryId}}"
+    - type: text
+      key: shopkeeperName
+      value: Asha General Store
+    - type: text
+      key: ownerFullName
+      value: Asha Kumar
+    - type: text
+      key: email
+      value: vendor@example.com
+    - type: text
+      key: mobileNumber
+      value: +1-555-0100
+    - type: text
+      key: area
+      value: Downtown
+    - type: text
+      key: city
+      value: Example City
+    - type: text
+      key: panNumber
+      value: ABCDE1234F
+    - type: text
+      key: panFullName
+      value: Asha Kumar
+    - type: text
+      key: gstRegistered
+      value: "false"
+    - type: text
+      key: tradeLicenseNumber
+      value: LICENSE-123
+    - type: text
+      key: bankAccountNumber
+      value: "123456789"
+    - type: text
+      key: bankAccountNumberConfirm
+      value: "123456789"
+    - type: text
+      key: ifscCode
+      value: ABCD0123456
+    - type: text
+      key: accountType
+      value: Savings
+    - type: file
+      key: panCard
+      src: []
+    - type: file
+      key: aadhaarCard
+      src: []
+    - type: file
+      key: storefrontPhotos
+      src: []
+    - type: file
+      key: tradeLicense
+      src: []
+auth:
+  type: bearer
+  credentials:
+    token: "{{vendorToken}}"
+order: 4000

@@ -1,0 +1,15 @@
+$kind: http-request
+description: Sends an OTP. Development builds currently return dummyOtp=123456 in the response.
+url: "{{baseUrl}}/api/vendor/auth/send-otp"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "vendor@example.com"
+    }
+auth:
+  type: noauth
+order: 1000

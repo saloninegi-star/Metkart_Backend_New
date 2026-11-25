@@ -1,0 +1,9 @@
+$kind: http-request
+description: admin authenticated endpoint.
+url: "{{baseUrl}}/api/admin/shopkeeper/shoptype/{{id}}"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{adminToken}}"
+order: 4000

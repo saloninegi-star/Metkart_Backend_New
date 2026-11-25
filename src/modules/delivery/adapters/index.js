@@ -16,14 +16,14 @@ class EmailProvider {
     return this.breaker.execute(async () => {
       let emailSent = false;
 
-      // If SMTP credentials are configured, send real email via Nodemailer
-      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      // If SMTP credentials or Brevo fallback API key are configured, send real email
+      if ((process.env.SMTP_USER && process.env.SMTP_PASS) || process.env.BREVO_API_KEY) {
         try {
           await sendOtpEmail(email, code, "Rider");
           console.log(`[EmailProvider] Real email OTP successfully sent to: ${email}`);
           emailSent = true;
         } catch (err) {
-          console.error(`[EmailProvider] Failed to send email via SMTP:`, err.message);
+          console.error(`[EmailProvider] Failed to send email:`, err.message);
           if (deliveryEnv.PROVIDER_MODE === "real") {
             throw new AppError("PROVIDER_UNAVAILABLE", 502, `Failed to send email OTP: ${err.message}`);
           }

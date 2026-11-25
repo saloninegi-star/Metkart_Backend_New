@@ -1,0 +1,7 @@
+$kind: http-request
+description: Retrieves all orders placed by the user using userId in URL params. Does NOT require authentication.
+url: "{{baseUrl}}/api/user/orders/{{userId}}"
+method: GET
+auth:
+  type: noauth
+order: 2000

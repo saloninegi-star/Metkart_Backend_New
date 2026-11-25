@@ -1,0 +1,24 @@
+$kind: http-request
+description: Admin Bearer token required. multipart/form-data; icon is optional.
+url: "{{baseUrl}}/api/admin/vendor/shoptype/{{businessTypeId}}"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: Grocery Store
+    - type: text
+      key: subtitle
+      value: Food and essentials
+    - type: text
+      key: isActive
+      value: "true"
+    - type: file
+      key: icon
+      src: []
+auth:
+  type: bearer
+  credentials:
+    token: "{{adminToken}}"
+order: 1000

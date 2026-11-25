@@ -1,0 +1,10 @@
+$kind: http-request
+name: Get Current Account (/accounts/me)
+description: Returns profile details for any authenticated account.
+url: "{{baseUrl}}/api/v1/accounts/me"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{v1Token}}"
+order: 3000

@@ -1,0 +1,9 @@
+$kind: http-request
+description: vendor authenticated endpoint.
+url: "{{baseUrl}}/api/vendor/onboarding/{{onboardingType}}/files/{{filename}}"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{vendorToken}}"
+order: 2000

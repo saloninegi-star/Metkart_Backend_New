@@ -1,0 +1,15 @@
+$kind: http-request
+description: Same handler as Send OTP.
+url: "{{baseUrl}}/api/vendor/auth/resend-otp"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "vendor@example.com"
+    }
+auth:
+  type: noauth
+order: 2000

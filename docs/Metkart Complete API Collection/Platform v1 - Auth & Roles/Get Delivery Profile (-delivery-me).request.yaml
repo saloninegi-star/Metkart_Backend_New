@@ -1,0 +1,10 @@
+$kind: http-request
+name: Get Delivery Profile (/delivery/me)
+description: Authorized only for accounts with delivery_boy role.
+url: "{{baseUrl}}/api/v1/delivery/me"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{v1Token}}"
+order: 6000

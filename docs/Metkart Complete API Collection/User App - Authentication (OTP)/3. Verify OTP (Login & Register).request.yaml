@@ -1,0 +1,23 @@
+$kind: http-request
+description: Verifies the 6-digit email OTP. Automatically sets user to verified and returns JWT token and user info. Token is auto-saved as userToken and user._id as userId.
+url: "{{baseUrl}}/api/user/auth/verify-otp"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "rahul@example.com",
+      "otp": "123456"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const body = pm.response.json();
+      if (body.token) pm.environment.set("userToken", body.token);
+      if (body.user && body.user._id) pm.environment.set("userId", body.user._id);
+    language: text/javascript
+order: 3000
