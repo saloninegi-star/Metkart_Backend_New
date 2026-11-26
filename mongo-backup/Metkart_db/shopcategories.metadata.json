@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"shopType":{"$numberInt":"1"},"name":{"$numberInt":"1"}},"name":"shopType_1_name_1","background":true,"unique":true}],"uuid":"3e005f4205284f7bbe47b8a345edc398","collectionName":"shopcategories","type":"collection"}

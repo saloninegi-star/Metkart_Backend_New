@@ -4,6 +4,8 @@ const {
   registerSchema,
   verifyOtpSchema,
   resendOtpSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   loginSchema,
   refreshSchema,
 } = require("./auth.validation");
@@ -25,6 +27,14 @@ router.post(
 );
 
 router.post(
+  "/forgot-password",
+  otpSendRateLimiter,
+  idempotencyMiddleware(),
+  validate({ body: forgotPasswordSchema }),
+  authController.forgotPassword
+);
+
+router.post(
   "/otp/verify",
   authRateLimiter,
   validate({ body: verifyOtpSchema }),
@@ -37,6 +47,14 @@ router.post(
   idempotencyMiddleware(),
   validate({ body: resendOtpSchema }),
   authController.resendOtp
+);
+
+router.post(
+  "/reset-password",
+  authRateLimiter,
+  idempotencyMiddleware(),
+  validate({ body: resetPasswordSchema }),
+  authController.resetPassword
 );
 
 router.post(

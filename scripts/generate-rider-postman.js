@@ -145,6 +145,136 @@ const postmanCollection = {
           },
         },
         {
+          name: "Forgot Password - Send Reset OTP (/api/delivery/auth/forgot-password)",
+          request: {
+            method: "POST",
+            header: [
+              { key: "Content-Type", value: "application/json" },
+              { key: "Idempotency-Key", value: "{{$guid}}" },
+            ],
+            body: {
+              mode: "raw",
+              options: { raw: { language: "json" } },
+              raw: JSON.stringify(
+                {
+                  email: "rider@example.com",
+                },
+                null,
+                2
+              ),
+            },
+            url: {
+              raw: "{{baseUrl}}/api/delivery/auth/forgot-password",
+              host: ["{{baseUrl}}"],
+              path: ["api", "delivery", "auth", "forgot-password"],
+            },
+            description:
+              "Sends a 6-digit PASSWORD_RESET OTP if an active rider account exists (returns masked 200 otherwise, enforces 45s cooldown). Also accessible via `/api/rider/auth/forgot-password` and `/api/v1/auth/forgot-password`.",
+          },
+        },
+        {
+          name: "Resend Password Reset OTP (/api/delivery/auth/otp/resend)",
+          request: {
+            method: "POST",
+            header: [
+              { key: "Content-Type", value: "application/json" },
+              { key: "Idempotency-Key", value: "{{$guid}}" },
+            ],
+            body: {
+              mode: "raw",
+              options: { raw: { language: "json" } },
+              raw: JSON.stringify(
+                {
+                  email: "rider@example.com",
+                  flow: "FORGOT_PASSWORD",
+                },
+                null,
+                2
+              ),
+            },
+            url: {
+              raw: "{{baseUrl}}/api/delivery/auth/otp/resend",
+              host: ["{{baseUrl}}"],
+              path: ["api", "delivery", "auth", "otp", "resend"],
+            },
+            description:
+              "Resends a 6-digit PASSWORD_RESET OTP (45s cooldown, masked 200 on unknown/inactive emails). Also accessible via `/api/rider/auth/otp/resend` and `/api/v1/auth/otp/resend`.",
+          },
+        },
+        {
+          name: "Verify Password Reset OTP (/api/delivery/auth/otp/verify)",
+          event: [
+            {
+              listen: "test",
+              script: {
+                type: "text/javascript",
+                exec: [
+                  "const json = pm.response.json();",
+                  "if (pm.response.code === 200 && json?.data?.resetToken) {",
+                  "  pm.environment.set('resetToken', json.data.resetToken);",
+                  "  pm.collectionVariables.set('resetToken', json.data.resetToken);",
+                  "}",
+                ],
+              },
+            },
+          ],
+          request: {
+            method: "POST",
+            header: [{ key: "Content-Type", value: "application/json" }],
+            body: {
+              mode: "raw",
+              options: { raw: { language: "json" } },
+              raw: JSON.stringify(
+                {
+                  email: "rider@example.com",
+                  otp: "123456",
+                  flow: "FORGOT_PASSWORD",
+                },
+                null,
+                2
+              ),
+            },
+            url: {
+              raw: "{{baseUrl}}/api/delivery/auth/otp/verify",
+              host: ["{{baseUrl}}"],
+              path: ["api", "delivery", "auth", "otp", "verify"],
+            },
+            description:
+              "Verifies PASSWORD_RESET OTP and returns a single-use resetToken (15 min TTL). Also accessible via `/api/rider/auth/otp/verify` and `/api/v1/auth/otp/verify`.",
+          },
+        },
+        {
+          name: "Reset Password (/api/delivery/auth/reset-password)",
+          request: {
+            method: "POST",
+            header: [
+              { key: "Content-Type", value: "application/json" },
+              { key: "Idempotency-Key", value: "{{$guid}}" },
+            ],
+            body: {
+              mode: "raw",
+              options: { raw: { language: "json" } },
+              raw: JSON.stringify(
+                {
+                  email: "rider@example.com",
+                  resetToken: "{{resetToken}}",
+                  newPassword: "NewPassword@2026",
+                  confirmPassword: "NewPassword@2026",
+                },
+                null,
+                2
+              ),
+            },
+            url: {
+              raw: "{{baseUrl}}/api/delivery/auth/reset-password",
+              host: ["{{baseUrl}}"],
+              path: ["api", "delivery", "auth", "reset-password"],
+            },
+            description:
+              "Consumes single-use resetToken atomically, updates passwordHash, and revokes active refresh tokens. Also accessible via `/api/rider/auth/reset-password` and `/api/v1/auth/reset-password`.",
+          },
+        },
+        {
           name: "Update Contact Phone (/api/delivery/onboarding/contact)",
           request: {
             method: "PATCH",
@@ -795,6 +925,7 @@ const postmanEnvironment = {
     { key: "adminBaseUrl", value: "http://localhost:3000/api/admin/delivery", enabled: true },
     { key: "riderToken", value: "", enabled: true },
     { key: "refreshToken", value: "", enabled: true },
+    { key: "resetToken", value: "", enabled: true },
     { key: "adminToken", value: "", enabled: true },
     { key: "riderId", value: "", enabled: true },
     { key: "fileId_DL", value: "", enabled: true },
@@ -804,6 +935,132 @@ const postmanEnvironment = {
     { key: "fileId_PASSBOOK", value: "", enabled: true },
     { key: "upiVerificationId", value: "", enabled: true },
     { key: "aadhaarRefId", value: "", enabled: true },
+  ],
+};
+
+function makePasswordResetRequest({ name, method = "POST", prefix, endpoint, body, withIdempotency = false, captureResetToken = false, description }) {
+  const headers = [{ key: "Content-Type", value: "application/json" }];
+  if (withIdempotency) {
+    headers.push({ key: "Idempotency-Key", value: "{{$guid}}" });
+  }
+  const cleanPrefix = prefix.replace(/^\/+/, "");
+  const cleanEndpoint = endpoint.replace(/^\/+/, "");
+  const item = {
+    name,
+    request: {
+      method,
+      header: headers,
+      body: {
+        mode: "raw",
+        options: { raw: { language: "json" } },
+        raw: JSON.stringify(body, null, 2),
+      },
+      url: {
+        raw: `{{baseUrl}}/${cleanPrefix}/${cleanEndpoint}`,
+        host: ["{{baseUrl}}"],
+        path: [...cleanPrefix.split("/"), ...cleanEndpoint.split("/")],
+      },
+      description,
+    },
+  };
+
+  if (captureResetToken) {
+    item.event = [
+      {
+        listen: "test",
+        script: {
+          type: "text/javascript",
+          exec: [
+            "const json = pm.response.json();",
+            "if (pm.response.code === 200 && json?.data?.resetToken) {",
+            "  pm.collectionVariables.set('resetToken', json.data.resetToken);",
+            "  pm.environment.set('resetToken', json.data.resetToken);",
+            "}",
+          ],
+        },
+      },
+    ];
+  }
+
+  return item;
+}
+
+function buildPasswordResetFolder(folderName, prefix) {
+  return {
+    name: folderName,
+    item: [
+      makePasswordResetRequest({
+        name: `1. Forgot Password (${prefix}/forgot-password)`,
+        prefix,
+        endpoint: "forgot-password",
+        withIdempotency: true,
+        body: { email: "{{riderEmail}}" },
+        description:
+          "Initiates password reset by creating a 6-digit PASSWORD_RESET OTP session (45s cooldown, masked 200 on unknown or inactive emails).",
+      }),
+      makePasswordResetRequest({
+        name: `2. Resend Forgot Password OTP (${prefix}/otp/resend)`,
+        prefix,
+        endpoint: "otp/resend",
+        withIdempotency: true,
+        body: { email: "{{riderEmail}}", flow: "FORGOT_PASSWORD" },
+        description: "Resends a fresh 6-digit PASSWORD_RESET OTP after the 45s cooldown.",
+      }),
+      makePasswordResetRequest({
+        name: `3. Verify Forgot Password OTP (${prefix}/otp/verify)`,
+        prefix,
+        endpoint: "otp/verify",
+        captureResetToken: true,
+        body: { email: "{{riderEmail}}", otp: "123456", flow: "FORGOT_PASSWORD" },
+        description:
+          "Verifies the 6-digit PASSWORD_RESET OTP and stores the single-use resetToken in {{resetToken}}.",
+      }),
+      makePasswordResetRequest({
+        name: `4. Reset Password (${prefix}/reset-password)`,
+        prefix,
+        endpoint: "reset-password",
+        withIdempotency: true,
+        body: {
+          email: "{{riderEmail}}",
+          resetToken: "{{resetToken}}",
+          newPassword: "{{newPassword}}",
+          confirmPassword: "{{newPassword}}",
+        },
+        description:
+          "Atomically consumes resetToken, updates Rider password, sets emailVerifiedAt if previously unverified, and revokes active refresh tokens.",
+      }),
+      makePasswordResetRequest({
+        name: `5. Login With New Password (${prefix}/login)`,
+        prefix,
+        endpoint: "login",
+        body: {
+          email: "{{riderEmail}}",
+          password: "{{newPassword}}",
+        },
+        description: "Verifies login succeeds with the newly reset password.",
+      }),
+    ],
+  };
+}
+
+const passwordResetCollection = {
+  info: {
+    _postman_id: "metkart-rider-password-reset-collection-id",
+    name: "Metkart Rider Password Reset API",
+    description:
+      "Postman collection covering the Rider Password Reset flow across Dedicated Delivery (/api/delivery/auth/*), Dedicated Rider Alias (/api/rider/auth/*), and Shared Auth (/api/v1/auth/*).",
+    schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+  },
+  variable: [
+    { key: "baseUrl", value: "http://localhost:3000", type: "string" },
+    { key: "riderEmail", value: "rider@example.com", type: "string" },
+    { key: "resetToken", value: "", type: "string" },
+    { key: "newPassword", value: "NewPassword@2026", type: "string" },
+  ],
+  item: [
+    buildPasswordResetFolder("1. Dedicated Delivery Auth (/api/delivery/auth)", "/api/delivery/auth"),
+    buildPasswordResetFolder("2. Dedicated Rider Alias (/api/rider/auth)", "/api/rider/auth"),
+    buildPasswordResetFolder("3. Shared Auth Delegation (/api/v1/auth)", "/api/v1/auth"),
   ],
 };
 
@@ -818,12 +1075,23 @@ function generatePostmanFiles() {
     "docs",
     "Metkart_Rider_Environment.postman_environment.json"
   );
+  const passwordResetCollectionPath = path.resolve(
+    process.cwd(),
+    "docs",
+    "Metkart_Rider_Password_Reset.postman_collection.json"
+  );
 
   fs.mkdirSync(path.dirname(collectionPath), { recursive: true });
   fs.writeFileSync(collectionPath, JSON.stringify(postmanCollection, null, 2), "utf8");
   fs.writeFileSync(envPath, JSON.stringify(postmanEnvironment, null, 2), "utf8");
+  fs.writeFileSync(
+    passwordResetCollectionPath,
+    JSON.stringify(passwordResetCollection, null, 2),
+    "utf8"
+  );
   console.log(`[Postman] Generated collection at ${collectionPath}`);
   console.log(`[Postman] Generated environment at ${envPath}`);
+  console.log(`[Postman] Generated password reset collection at ${passwordResetCollectionPath}`);
 }
 
 if (require.main === module) {

@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"businessType_id":{"$numberInt":"1"},"name":{"$numberInt":"1"}},"name":"businessType_id_1_name_1","background":true,"unique":true}],"uuid":"6699bd3762aa4ba499d5cd1576676117","collectionName":"vendorshoptypes","type":"collection"}
