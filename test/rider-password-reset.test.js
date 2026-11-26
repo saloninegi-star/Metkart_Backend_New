@@ -26,6 +26,7 @@ const {
   OtpSession,
   RefreshToken,
   PasswordResetToken,
+  LoginAttempt,
   IdempotencyKey,
   AuditLog,
 } = require("../src/modules/delivery/models");
@@ -94,6 +95,7 @@ function createInMemoryAuthStore() {
   const otpSessions = [];
   const resetTokens = [];
   const refreshTokens = [];
+  const loginAttempts = [];
   const idempotencyKeys = [];
   const audits = [];
 
@@ -128,6 +130,7 @@ function createInMemoryAuthStore() {
     otpSessions,
     resetTokens,
     refreshTokens,
+    loginAttempts,
     idempotencyKeys,
     audits,
     installStubs() {
@@ -146,6 +149,8 @@ function createInMemoryAuthStore() {
         resetFindOneAndUpdate: PasswordResetToken.findOneAndUpdate,
         refreshCreate: RefreshToken.create,
         refreshUpdateMany: RefreshToken.updateMany,
+        attemptFindOne: LoginAttempt.findOne,
+        attemptFindOneAndUpdate: LoginAttempt.findOneAndUpdate,
         idemFindOne: IdempotencyKey.findOne,
         idemCreate: IdempotencyKey.create,
         auditCreate: AuditLog.create,
@@ -271,6 +276,32 @@ function createInMemoryAuthStore() {
         }
       };
 
+      LoginAttempt.findOne = (filter) =>
+        wrapFindQuery(loginAttempts, (a) => a.identifier === filter.identifier);
+
+      LoginAttempt.findOneAndUpdate = async (filter, update, options = {}) => {
+        let doc = loginAttempts.find((a) => a.identifier === filter.identifier);
+        if (doc && filter.$or) {
+          const matchesOr = filter.$or.some(
+            (cond) =>
+              ("lockedUntil" in cond && cond.lockedUntil === null && doc.lockedUntil === null) ||
+              (cond.lockedUntil?.$lte && doc.lockedUntil && doc.lockedUntil <= cond.lockedUntil.$lte)
+          );
+          if (!matchesOr) return null;
+        }
+        if (!doc && !options.upsert) return null;
+        if (!doc) {
+          doc = { _id: nextId(), identifier: filter.identifier, failedTimestamps: [], lockedUntil: null };
+          loginAttempts.push(doc);
+        }
+        if (Array.isArray(update)) {
+          doc.failedTimestamps = [...(doc.failedTimestamps || []), new Date()];
+          return doc;
+        }
+        Object.assign(doc, update.$set || update);
+        return doc;
+      };
+
       IdempotencyKey.findOne = (filter) =>
         wrapFindQuery(
           idempotencyKeys,
@@ -315,6 +346,8 @@ function createInMemoryAuthStore() {
           PasswordResetToken.findOneAndUpdate = originals.resetFindOneAndUpdate;
           RefreshToken.create = originals.refreshCreate;
           RefreshToken.updateMany = originals.refreshUpdateMany;
+          LoginAttempt.findOne = originals.attemptFindOne;
+          LoginAttempt.findOneAndUpdate = originals.attemptFindOneAndUpdate;
           IdempotencyKey.findOne = originals.idemFindOne;
           IdempotencyKey.create = originals.idemCreate;
           AuditLog.create = originals.auditCreate;

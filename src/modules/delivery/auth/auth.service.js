@@ -7,6 +7,7 @@ const {
   OtpSession,
   RefreshToken,
   PasswordResetToken,
+  LoginAttempt,
 } = require("../models");
 const AppError = require("../lib/AppError");
 const {
@@ -518,24 +519,239 @@ async function resetPassword({ email, resetToken, newPassword }) {
   };
 }
 
-async function loginRider({ email, password }) {
-  const normalizedEmail = email.toLowerCase().trim();
+function resolveServerTime(now) {
+  return now instanceof Date && !Number.isNaN(now.getTime()) ? now : new Date();
+}
+
+function buildFailedAttemptError(attemptDoc, now) {
+  const lockedUntil = attemptDoc?.lockedUntil ? new Date(attemptDoc.lockedUntil) : null;
+  if (lockedUntil && lockedUntil > now) {
+    const retryAfterSeconds = Math.max(1, Math.ceil((lockedUntil.getTime() - now.getTime()) / 1000));
+    return new AppError(
+      "ACCOUNT_LOCKED",
+      423,
+      "Too many failed login attempts. Account is temporarily locked for 24 hours. Please try again later.",
+      {
+        remainingAttempts: 0,
+        lockedUntil: lockedUntil.toISOString(),
+        retryAfterSeconds,
+      }
+    );
+  }
+
+  const maxAttempts = deliveryEnv.LOGIN_MAX_ATTEMPTS;
+  const attemptsUsed = Array.isArray(attemptDoc?.failedTimestamps) ? attemptDoc.failedTimestamps.length : 0;
+  const remainingAttempts = Math.max(0, maxAttempts - attemptsUsed);
+
+  return new AppError("INVALID_CREDENTIALS", 401, "Invalid email or password", {
+    remainingAttempts,
+  });
+}
+
+async function getActiveLoginLock(identifier, now) {
+  const existingAttempt = await LoginAttempt.findOne({ identifier }).lean();
+  if (existingAttempt?.lockedUntil && new Date(existingAttempt.lockedUntil) > now) {
+    return buildFailedAttemptError(existingAttempt, now);
+  }
+  return null;
+}
+
+function buildRecordFailedAttemptPipeline({
+  identifier,
+  now,
+  maxAttempts,
+  windowCutoff,
+  nextLockoutUntil,
+  nextWindowExpiry,
+  nextLockedRecordExpiry,
+}) {
+  const currentlyLockedExpr = {
+    $and: [
+      { $ne: [{ $ifNull: ["$lockedUntil", null] }, null] },
+      { $gt: ["$lockedUntil", now] },
+    ],
+  };
+
+  // Keep only failures inside the rolling 24h window that occurred after any prior expired lock.
+  const recentAttemptsExpr = {
+    $filter: {
+      input: { $ifNull: ["$failedTimestamps", []] },
+      as: "ts",
+      cond: {
+        $and: [
+          { $gt: ["$$ts", windowCutoff] },
+          {
+            $or: [
+              { $eq: [{ $ifNull: ["$lockedUntil", null] }, null] },
+              { $gt: ["$$ts", "$lockedUntil"] },
+            ],
+          },
+        ],
+      },
+    },
+  };
+
+  const nextTimestampsExpr = {
+    $slice: [{ $concatArrays: [recentAttemptsExpr, [now]] }, -maxAttempts],
+  };
+
+  const shouldLockNowExpr = {
+    $gte: [{ $size: nextTimestampsExpr }, maxAttempts],
+  };
+
+  return [
+    {
+      $set: {
+        identifier,
+        createdAt: { $ifNull: ["$createdAt", now] },
+        failedTimestamps: {
+          $cond: {
+            if: currentlyLockedExpr,
+            then: { $ifNull: ["$failedTimestamps", []] },
+            else: nextTimestampsExpr,
+          },
+        },
+        lockedUntil: {
+          $cond: {
+            if: currentlyLockedExpr,
+            then: "$lockedUntil",
+            else: {
+              $cond: {
+                if: shouldLockNowExpr,
+                then: nextLockoutUntil,
+                else: null,
+              },
+            },
+          },
+        },
+        expiresAt: {
+          $cond: {
+            if: currentlyLockedExpr,
+            then: { $ifNull: ["$expiresAt", nextLockedRecordExpiry] },
+            else: {
+              $cond: {
+                if: shouldLockNowExpr,
+                then: nextLockedRecordExpiry,
+                else: nextWindowExpiry,
+              },
+            },
+          },
+        },
+      },
+    },
+  ];
+}
+
+async function recordFailedLoginAttempt(identifier, now, actorUserId = null) {
+  const maxAttempts = deliveryEnv.LOGIN_MAX_ATTEMPTS;
+  const windowMs = deliveryEnv.LOGIN_ATTEMPT_WINDOW_MS;
+  const lockoutMs = deliveryEnv.LOGIN_LOCKOUT_MS;
+
+  const windowCutoff = new Date(now.getTime() - windowMs);
+  const nextLockoutUntil = new Date(now.getTime() + lockoutMs);
+  const nextWindowExpiry = new Date(now.getTime() + windowMs);
+  const nextLockedRecordExpiry = new Date(Math.max(nextWindowExpiry.getTime(), nextLockoutUntil.getTime()));
+
+  let updatedAttempt = null;
+  for (let retry = 0; retry < 5; retry += 1) {
+    try {
+      const pipeline = buildRecordFailedAttemptPipeline({
+        identifier,
+        now,
+        maxAttempts,
+        windowCutoff,
+        nextLockoutUntil,
+        nextWindowExpiry,
+        nextLockedRecordExpiry,
+      });
+
+      updatedAttempt = await LoginAttempt.findOneAndUpdate(
+        { identifier },
+        pipeline,
+        { upsert: true, new: true }
+      );
+      break;
+    } catch (err) {
+      // Concurrent first-time upserts on the unique identifier index can race once; retry against the created doc.
+      if (err && err.code === 11000 && retry < 4) {
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  const errToThrow = buildFailedAttemptError(updatedAttempt, now);
+
+  if (errToThrow.httpStatus === 423) {
+    await recordAudit({
+      actorUserId,
+      action: "RIDER_LOGIN_LOCKED",
+      entity: "login_attempts",
+      entityId: updatedAttempt?._id || "unknown",
+      meta: {
+        lockedUntil: errToThrow.details?.lockedUntil,
+      },
+    });
+  }
+
+  throw errToThrow;
+}
+
+async function clearFailedLoginAttempts(identifier, now) {
+  const unlockedReset = await LoginAttempt.findOneAndUpdate(
+    {
+      identifier,
+      $or: [{ lockedUntil: null }, { lockedUntil: { $lte: now } }],
+    },
+    {
+      $set: {
+        failedTimestamps: [],
+        lockedUntil: null,
+        expiresAt: new Date(now.getTime() + deliveryEnv.LOGIN_ATTEMPT_WINDOW_MS),
+      },
+    },
+    { new: true }
+  );
+
+  if (!unlockedReset) {
+    const activeLockError = await getActiveLoginLock(identifier, now);
+    if (activeLockError) {
+      throw activeLockError;
+    }
+  }
+}
+
+async function loginRider({ email, password }, options = {}) {
+  const now = resolveServerTime(options?.now);
+  const normalizedEmail = typeof email === "string" ? email.toLowerCase().trim() : "";
+
+  if (!normalizedEmail || typeof password !== "string" || password.length === 0) {
+    throw new AppError("VALIDATION_ERROR", 400, "Email and password are required");
+  }
+
+  const activeLockError = await getActiveLoginLock(normalizedEmail, now);
+  if (activeLockError) {
+    throw activeLockError;
+  }
+
   const user = await RiderUser.findOne({ email: normalizedEmail }).select("+passwordHash");
 
   if (!user) {
     // Run dummy compare to thwart timing attacks
     await comparePassword(password, null);
-    throw new AppError("INVALID_CREDENTIALS", 401, "Invalid email or password");
+    await recordFailedLoginAttempt(normalizedEmail, now, null);
   }
 
   const isPasswordValid = await comparePassword(password, user.passwordHash);
   if (!isPasswordValid) {
-    throw new AppError("INVALID_CREDENTIALS", 401, "Invalid email or password");
+    await recordFailedLoginAttempt(normalizedEmail, now, user._id);
   }
 
   if (!user.emailVerifiedAt) {
     throw new AppError("EMAIL_NOT_VERIFIED", 403, "Please verify your email address before logging in");
   }
+
+  await clearFailedLoginAttempts(normalizedEmail, now);
 
   const accessToken = createAccessToken(user);
   const refreshToken = await createRefreshToken(user._id);
