@@ -2,9 +2,13 @@ const mongoose = require("mongoose");
 
 const sharedKeys = [
   "vendorId",
+  "roleType",
+  "onboardingType",
   "businessTypeId",
   "shopTypeId",
   "categoryId",
+  "productCategory",
+  "productCategoryId",
   "ownerFullName",
   "fullName",
   "email",
@@ -32,37 +36,68 @@ const sharedKeys = [
   "googleMapsLocation",
   "panNumber",
   "panFullName",
+  "panAddress",
+  "aadhaarNumber",
+  "aadhaarFullName",
+  "aadhaarAddress",
   "gstRegistered",
   "gstNumber",
   "gstFullName",
   "registeredBusinessAddress",
+  "licenseRegistered",
+  "tradeLicenseRegistered",
   "tradeLicenseNumber",
   "bankAccountNumber",
   "bankAccountNumberConfirm",
   "ifscCode",
   "accountType",
+  "termsAccepted",
 ];
 
 const roleSchemas = {
   shopkeeper: {
-    keys: ["shopkeeperName"],
+    keys: ["shopkeeperName", "shopName"],
     required: ["shopkeeperName"],
     businessName: "shopkeeperName",
   },
   restaurant: {
-    keys: ["restaurantName", "cuisineTypes", "fssaiNumber", "fssaiLicenseNumber"],
+    keys: [
+      "restaurantName",
+      "cuisineTypes",
+      "fssaiNumber",
+      "fssaiLicenseNumber",
+      "costForTwo",
+      "diningAvailable",
+    ],
     required: ["restaurantName", "cuisineTypes", "fssaiNumber"],
     businessName: "restaurantName",
   },
   mechanic: {
-    keys: ["garageName", "mechanicName", "serviceCategories", "yearsExperience"],
-    required: ["garageName", "serviceCategories", "yearsExperience"],
+    keys: [
+      "garageName",
+      "mechanicName",
+      "servicesOffered",
+      "supportedVehicles",
+      "serviceCategories",
+      "yearsExperience",
+      "timing",
+      "openTime",
+      "closeTime",
+      "openDays",
+      "deviceType",
+    ],
+    required: ["garageName"],
     businessName: "garageName",
   },
   scrapVendor: {
     keys: ["businessName", "scrapVendorName", "scrapCategories", "pickupAvailable"],
     required: ["businessName", "scrapCategories", "pickupAvailable"],
     businessName: "businessName",
+  },
+  user: {
+    keys: ["name", "profileName", "preferences"],
+    required: [],
+    businessName: "name",
   },
 };
 
@@ -82,6 +117,8 @@ const extendedFileFields = [
   "menuPhotos",
   "outletPhotos",
   "cancelledCheque",
+  "workshopFront",
+  "menuSpreadsheet",
 ];
 
 const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -115,13 +152,27 @@ function validateOnboardingData(type, data, files, requireComplete) {
   const value = {};
   for (const [key, fieldValue] of Object.entries(data)) {
     if (!allowedKeys.has(key)) continue;
+
     if (
-      ["whatsappUpdates", "primaryContactSameAsOwner", "gstRegistered", "pickupAvailable"].includes(key)
+      [
+        "whatsappUpdates",
+        "primaryContactSameAsOwner",
+        "gstRegistered",
+        "licenseRegistered",
+        "tradeLicenseRegistered",
+        "pickupAvailable",
+        "diningAvailable",
+        "termsAccepted",
+      ].includes(key)
     ) {
       if (typeof fieldValue === "boolean") {
         value[key] = fieldValue;
-      } else if (typeof fieldValue === "string" && ["true", "false"].includes(fieldValue.trim().toLowerCase())) {
-        value[key] = fieldValue.trim().toLowerCase() === "true";
+      } else if (
+        typeof fieldValue === "string" &&
+        ["true", "false", "yes", "no", "1", "0"].includes(fieldValue.trim().toLowerCase())
+      ) {
+        const lower = fieldValue.trim().toLowerCase();
+        value[key] = lower === "true" || lower === "yes" || lower === "1";
       } else {
         errors.push(`${key} must be a boolean`);
       }
@@ -185,19 +236,46 @@ function validateOnboardingData(type, data, files, requireComplete) {
           value.location.nearbyLandmark = value.location.landmark;
         }
       }
-    } else if (["cuisineTypes", "serviceCategories", "scrapCategories"].includes(key)) {
+    } else if (
+      [
+        "cuisineTypes",
+        "serviceCategories",
+        "scrapCategories",
+        "servicesOffered",
+        "supportedVehicles",
+        "openDays",
+      ].includes(key)
+    ) {
       let arrayValue = fieldValue;
       if (typeof fieldValue === "string") {
         try {
           arrayValue = JSON.parse(fieldValue);
         } catch {
-          arrayValue = null;
+          arrayValue = fieldValue.split(",").map((s) => s.trim()).filter(Boolean);
         }
       }
       if (!Array.isArray(arrayValue) || arrayValue.some((item) => typeof item !== "string")) {
         errors.push(`${key} must be an array of strings`);
       } else {
         value[key] = arrayValue.map((item) => item.trim()).filter(Boolean);
+      }
+    } else if (key === "timing") {
+      let timingObj = fieldValue;
+      if (typeof fieldValue === "string") {
+        try {
+          timingObj = JSON.parse(fieldValue);
+        } catch {
+          timingObj = {};
+        }
+      }
+      if (isPlainObject(timingObj)) {
+        value.timing = {
+          openTime: typeof timingObj.openTime === "string" ? timingObj.openTime.trim() : "",
+          closeTime: typeof timingObj.closeTime === "string" ? timingObj.closeTime.trim() : "",
+          openDays: Array.isArray(timingObj.openDays)
+            ? timingObj.openDays.map((d) => String(d).trim()).filter(Boolean)
+            : [],
+        };
       }
     } else if (key === "yearsExperience") {
       const yearsExperience =
@@ -208,6 +286,16 @@ function validateOnboardingData(type, data, files, requireComplete) {
         errors.push("yearsExperience must be an integer from 0 to 100");
       } else {
         value[key] = yearsExperience;
+      }
+    } else if (key === "costForTwo") {
+      const cost =
+        typeof fieldValue === "string" && fieldValue.trim() !== ""
+          ? Number(fieldValue)
+          : fieldValue;
+      if (typeof cost !== "number" || Number.isNaN(cost) || cost < 0) {
+        errors.push("costForTwo must be a positive number");
+      } else {
+        value[key] = cost;
       }
     } else if (["latitude", "longitude"].includes(key)) {
       const coordinate =
@@ -230,14 +318,47 @@ function validateOnboardingData(type, data, files, requireComplete) {
     }
   }
 
+  // Alias synchronization
   if (value.fullName && !value.ownerFullName) {
     value.ownerFullName = value.fullName;
+  }
+  if (value.ownerFullName && !value.fullName) {
+    value.fullName = value.ownerFullName;
   }
   if (value.emailAddress && !value.email) {
     value.email = value.emailAddress;
   }
-  if (type === "mechanic" && value.mechanicName && !value.garageName) {
-    value.garageName = value.mechanicName;
+  if (type === "mechanic") {
+    if (value.mechanicName && !value.garageName) {
+      value.garageName = value.mechanicName;
+    }
+    if (value.garageName && !value.mechanicName) {
+      value.mechanicName = value.garageName;
+    }
+    if (value.servicesOffered && !value.serviceCategories) {
+      value.serviceCategories = value.servicesOffered;
+    }
+    if (value.serviceCategories && !value.servicesOffered) {
+      value.servicesOffered = value.serviceCategories;
+    }
+    if (value.openTime || value.closeTime || value.openDays) {
+      value.timing = {
+        openTime: value.openTime || value.timing?.openTime || "",
+        closeTime: value.closeTime || value.timing?.closeTime || "",
+        openDays: value.openDays || value.timing?.openDays || [],
+      };
+    }
+    if (value.yearsExperience === undefined) {
+      value.yearsExperience = 0;
+    }
+  }
+  if (type === "shopkeeper") {
+    if (value.shopkeeperName && !value.shopName) {
+      value.shopName = value.shopkeeperName;
+    }
+    if (value.shopName && !value.shopkeeperName) {
+      value.shopkeeperName = value.shopName;
+    }
   }
   if (type === "scrapVendor" && value.scrapVendorName && !value.businessName) {
     value.businessName = value.scrapVendorName;
@@ -248,9 +369,11 @@ function validateOnboardingData(type, data, files, requireComplete) {
 
   const normalizedFiles = { ...(files || {}) };
   if (normalizedFiles.outletPhotos) normalizedFiles.storefrontPhotos = true;
+  if (normalizedFiles.workshopFront) normalizedFiles.storefrontPhotos = true;
   if (normalizedFiles.cancelledCheque) normalizedFiles.bankProof = true;
   if (normalizedFiles.fssaiLicense) normalizedFiles.fssaiCertificate = true;
   if (normalizedFiles.menuPhotos) normalizedFiles.menuCard = true;
+  if (normalizedFiles.menuSpreadsheet) normalizedFiles.menuCard = true;
 
   if (value.email && !validEmail.test(value.email)) {
     errors.push("email must be a valid email address");
@@ -267,7 +390,7 @@ function validateOnboardingData(type, data, files, requireComplete) {
   if (value.ifscCode && !validIfsc.test(value.ifscCode)) {
     errors.push("ifscCode must be a valid IFSC code");
   }
-  for (const key of ["vendorId", "businessTypeId", "shopTypeId", "categoryId"]) {
+  for (const key of ["vendorId", "businessTypeId", "shopTypeId", "categoryId", "productCategoryId"]) {
     if (value[key] && !mongoose.Types.ObjectId.isValid(value[key])) {
       errors.push(`${key} must be a valid ID`);
     }
@@ -317,13 +440,18 @@ function validateOnboardingData(type, data, files, requireComplete) {
         if (!value[key]) errors.push(`${key} is required when GST is registered`);
       }
       if (!normalizedFiles.gstCertificate) errors.push("gstCertificate file is required");
-    } else if (!value.tradeLicenseNumber && !normalizedFiles.tradeLicense) {
+    } else if (
+      !value.tradeLicenseNumber &&
+      !normalizedFiles.tradeLicense &&
+      value.licenseRegistered !== false &&
+      value.tradeLicenseRegistered !== false
+    ) {
       errors.push("tradeLicenseNumber or tradeLicense file is required when GST is not registered");
     }
     for (const key of ["panCard", "aadhaarCard", "storefrontPhotos"]) {
       if (!normalizedFiles[key]) errors.push(`${key} file is required`);
     }
-    for (const key of ["cuisineTypes", "serviceCategories", "scrapCategories"]) {
+    for (const key of ["cuisineTypes", "serviceCategories", "scrapCategories", "servicesOffered"]) {
       if (value[key] && value[key].length === 0) {
         errors.push(`${key} must contain at least one item`);
       }

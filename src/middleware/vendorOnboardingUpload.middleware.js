@@ -13,6 +13,9 @@ const supportedMimeTypes = new Map([
   ["image/jpeg", ".jpg"],
   ["image/png", ".png"],
   ["image/webp", ".webp"],
+  ["text/csv", ".csv"],
+  ["application/vnd.ms-excel", ".xls"],
+  ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".xlsx"],
 ]);
 
 const storage = multer.diskStorage({
@@ -25,7 +28,8 @@ const storage = multer.diskStorage({
     }
   },
   filename(req, file, callback) {
-    callback(null, `${crypto.randomUUID()}${supportedMimeTypes.get(file.mimetype)}`);
+    const ext = supportedMimeTypes.get(file.mimetype) || path.extname(file.originalname) || ".bin";
+    callback(null, `${crypto.randomUUID()}${ext}`);
   },
 });
 
@@ -39,7 +43,7 @@ const upload = multer({
   },
   fileFilter(req, file, callback) {
     if (!supportedMimeTypes.has(file.mimetype)) {
-      const error = new Error("Only PDF, JPEG, PNG, and WEBP files are allowed");
+      const error = new Error("Only PDF, JPEG, PNG, WEBP, CSV, and Excel files are allowed");
       error.statusCode = 400;
       return callback(error);
     }
