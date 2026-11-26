@@ -12,14 +12,15 @@ class EmailProvider {
     this.breaker = new CircuitBreaker("EmailProvider");
   }
 
-  async sendOtp(email, code) {
+  async sendOtp(email, code, options = {}) {
     return this.breaker.execute(async () => {
       let emailSent = false;
+      const fullName = options.fullName || "Rider";
 
       // If SMTP credentials or Brevo fallback API key are configured, send real email
       if ((process.env.SMTP_USER && process.env.SMTP_PASS) || process.env.BREVO_API_KEY) {
         try {
-          await sendOtpEmail(email, code, "Rider");
+          await sendOtpEmail(email, code, fullName, options);
           console.log(`[EmailProvider] Real email OTP successfully sent to: ${email}`);
           emailSent = true;
         } catch (err) {

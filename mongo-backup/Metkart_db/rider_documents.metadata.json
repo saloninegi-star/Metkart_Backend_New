@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"riderId":{"$numberInt":"1"},"docType":{"$numberInt":"1"}},"name":"riderId_1_docType_1","background":true,"unique":true}],"uuid":"726a0ea17a4c45a7bb157f6d0dee3f8e","collectionName":"rider_documents","type":"collection"}

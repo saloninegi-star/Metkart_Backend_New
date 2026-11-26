@@ -25,6 +25,7 @@ cloudResources:
     ../postman/collections/Clean7 - Billing Module: 296db3f0-0516-40c3-a7e6-8c34e0b6ece5
     ../postman/collections/Clean7 - Customer Location & Branch Filtering: b8cd99b5-265b-46ef-8719-17d88590b1d5
     ../postman/collections/Clean7 - Frontend Integration (Customer Location & Branch Filter: ec027c62-d5dd-4e5e-aa98-b1785f80b5d1
+    ../postman/collections/Metkart Rider Password Reset API: fdf0eb69-4458-411b-87df-e2682005415d
 resourceNameMappings:
   specs:
     - ../postman/specs/hello/hello.json: hello

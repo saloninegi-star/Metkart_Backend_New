@@ -6,6 +6,8 @@ const {
   registerSchema,
   verifyOtpSchema,
   resendOtpSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   refreshSchema,
 } = require("../delivery/auth/auth.validation");
 const validate = require("../delivery/middleware/validate.middleware");
@@ -53,6 +55,14 @@ function createAuthRoutes(config) {
 
   // Rider auth endpoints specified under /auth/*
   router.post(
+    "/forgot-password",
+    authRateLimit,
+    idempotencyMiddleware(),
+    validate({ body: forgotPasswordSchema }),
+    deliveryAuthController.forgotPassword
+  );
+
+  router.post(
     "/otp/verify",
     authRateLimit,
     validate({ body: verifyOtpSchema }),
@@ -65,6 +75,14 @@ function createAuthRoutes(config) {
     idempotencyMiddleware(),
     validate({ body: resendOtpSchema }),
     deliveryAuthController.resendOtp
+  );
+
+  router.post(
+    "/reset-password",
+    authRateLimit,
+    idempotencyMiddleware(),
+    validate({ body: resetPasswordSchema }),
+    deliveryAuthController.resetPassword
   );
 
   router.post(
