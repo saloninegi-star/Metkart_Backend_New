@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const fileSchema = new mongoose.Schema(
   {
@@ -179,12 +180,25 @@ const vendorSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    passwordHash: {
+      type: String,
+      default: null,
+      select: false,
+    },
     // OTP verification fields
     otp: {
       type: String,
       default: null,
     },
     otpExpiresAt: {
+      type: Date,
+      default: null,
+    },
+    otpAttempts: {
+      type: Number,
+      default: 0,
+    },
+    otpLockedUntil: {
       type: Date,
       default: null,
     },
@@ -280,5 +294,10 @@ const vendorSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+vendorSchema.methods.comparePassword = function comparePassword(password) {
+  if (!this.passwordHash) return Promise.resolve(false);
+  return bcrypt.compare(password, this.passwordHash);
+};
 
 module.exports = mongoose.model('Vendor', vendorSchema);
