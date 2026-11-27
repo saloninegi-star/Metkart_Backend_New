@@ -6,6 +6,8 @@ const {
   RiderProfile,
   OtpSession,
   RefreshToken,
+  PasswordResetToken,
+  LoginAttempt,
 } = require("../models");
 const AppError = require("../lib/AppError");
 const {
@@ -18,6 +20,11 @@ const { emailProvider } = require("../adapters");
 const { deliveryEnv } = require("../config/env");
 const { recordAudit } = require("../lib/audit");
 
+const OTP_PURPOSE = {
+  EMAIL_VERIFY: "EMAIL_VERIFY",
+  PASSWORD_RESET: "PASSWORD_RESET",
+};
+
 const ALL_STEPS = [
   "RIDE_TYPE",
   "PREFERENCE",
@@ -28,6 +35,17 @@ const ALL_STEPS = [
   "KIT_NOMINEE",
   "BANK",
 ];
+
+function resolveOtpPurpose(flow = "REGISTER") {
+  if (flow === "FORGOT_PASSWORD" || flow === "PASSWORD_RESET") {
+    return OTP_PURPOSE.PASSWORD_RESET;
+  }
+  return OTP_PURPOSE.EMAIL_VERIFY;
+}
+
+function hashToken(rawToken) {
+  return crypto.createHash("sha256").update(rawToken).digest("hex");
+}
 
 function determineCurrentStep(completedSteps = []) {
   for (const step of ALL_STEPS) {
@@ -63,7 +81,7 @@ function createAccessToken(user) {
 
 async function createRefreshToken(userId, familyId = null) {
   const tokenRaw = crypto.randomBytes(32).toString("hex");
-  const tokenHash = crypto.createHash("sha256").update(tokenRaw).digest("hex");
+  const tokenHash = hashToken(tokenRaw);
   const famId = familyId || crypto.randomUUID();
   const expiresAt = new Date(Date.now() + deliveryEnv.REFRESH_TTL_DAYS * 86400 * 1000);
 
@@ -77,6 +95,98 @@ async function createRefreshToken(userId, familyId = null) {
   return tokenRaw;
 }
 
+async function assertOtpCooldown({ userId, purpose, activeOnly = false }) {
+  const query = { userId, purpose };
+  if (activeOnly) {
+    query.consumedAt = null;
+    query.expiresAt = { $gt: new Date() };
+  }
+
+  const lastSession = await OtpSession.findOne(query).sort({ createdAt: -1 });
+  if (!lastSession) return;
+
+  const elapsedMs = Date.now() - lastSession.lastSentAt.getTime();
+  const cooldownMs = deliveryEnv.OTP_RESEND_SECONDS * 1000;
+  if (elapsedMs < cooldownMs) {
+    const waitSeconds = Math.max(1, Math.ceil((cooldownMs - elapsedMs) / 1000));
+    throw new AppError(
+      "RATE_LIMITED",
+      429,
+      `Please wait ${waitSeconds}s before requesting a new OTP`,
+      { retryAfterSeconds: waitSeconds }
+    );
+  }
+}
+
+async function issueOtpSession({ userId, email, purpose, activeOnlyCooldown = false }) {
+  await assertOtpCooldown({ userId, purpose, activeOnly: activeOnlyCooldown });
+
+  await OtpSession.updateMany(
+    { userId, purpose, consumedAt: null },
+    { consumedAt: new Date() }
+  );
+
+  const otp = generateOtp();
+  const codeHash = hmacSha256(otp, deliveryEnv.JWT_SECRET);
+  const expiresAt = new Date(Date.now() + deliveryEnv.OTP_EXPIRY_SECONDS * 1000);
+
+  await OtpSession.create({
+    userId,
+    purpose,
+    codeHash,
+    expiresAt,
+    lastSentAt: new Date(),
+  });
+
+  await emailProvider.sendOtp(email, otp, { purpose });
+}
+
+async function verifyAndConsumeOtpSession({ userId, purpose, otp }) {
+  const otpSession = await OtpSession.findOne({
+    userId,
+    purpose,
+    consumedAt: null,
+  }).sort({ createdAt: -1 });
+
+  if (!otpSession) {
+    throw new AppError("OTP_EXPIRED", 422, "No active OTP found. Please request a new code.");
+  }
+
+  if (otpSession.expiresAt < new Date()) {
+    throw new AppError("OTP_EXPIRED", 422, "Verification code has expired");
+  }
+
+  if (otpSession.attempts >= deliveryEnv.OTP_MAX_ATTEMPTS) {
+    throw new AppError(
+      "OTP_ATTEMPTS_EXCEEDED",
+      429,
+      "Maximum verification attempts exceeded. Please request a new code."
+    );
+  }
+
+  const expectedHash = hmacSha256(otp, deliveryEnv.JWT_SECRET);
+  const isMock = deliveryEnv.PROVIDER_MODE === "mock" && otp === "123456";
+  const isValid = isMock || constantTimeCompare(otpSession.codeHash, expectedHash);
+
+  if (!isValid) {
+    const updated = await OtpSession.findByIdAndUpdate(
+      otpSession._id,
+      { $inc: { attempts: 1 } },
+      { new: true }
+    );
+    if (updated.attempts >= deliveryEnv.OTP_MAX_ATTEMPTS) {
+      throw new AppError(
+        "OTP_ATTEMPTS_EXCEEDED",
+        429,
+        "Maximum verification attempts exceeded. Please request a new code."
+      );
+    }
+    throw new AppError("OTP_INVALID", 422, "Invalid verification code");
+  }
+
+  await OtpSession.findByIdAndUpdate(otpSession._id, { consumedAt: new Date() });
+}
+
 async function registerRider({ email, password, role, phone }) {
   const normalizedEmail = email.toLowerCase().trim();
 
@@ -88,38 +198,12 @@ async function registerRider({ email, password, role, phone }) {
     }
 
     // Unverified user: resend OTP and return 200
-    const activeOtp = await OtpSession.findOne({
+    await issueOtpSession({
       userId: existingUser._id,
-      purpose: "EMAIL_VERIFY",
-      consumedAt: null,
-      expiresAt: { $gt: new Date() },
-    }).sort({ createdAt: -1 });
-
-    if (activeOtp && Date.now() - activeOtp.lastSentAt.getTime() < deliveryEnv.OTP_RESEND_SECONDS * 1000) {
-      const waitTime = Math.ceil((deliveryEnv.OTP_RESEND_SECONDS * 1000 - (Date.now() - activeOtp.lastSentAt.getTime())) / 1000);
-      throw new AppError("RATE_LIMITED", 429, `Please wait ${waitTime}s before requesting a new OTP`, {
-        retryAfterSeconds: waitTime,
-      });
-    }
-
-    const otp = generateOtp();
-    const codeHash = hmacSha256(otp, deliveryEnv.JWT_SECRET);
-    const expiresAt = new Date(Date.now() + deliveryEnv.OTP_EXPIRY_SECONDS * 1000);
-
-    await OtpSession.updateMany(
-      { userId: existingUser._id, purpose: "EMAIL_VERIFY", consumedAt: null },
-      { consumedAt: new Date() }
-    );
-
-    await OtpSession.create({
-      userId: existingUser._id,
-      purpose: "EMAIL_VERIFY",
-      codeHash,
-      expiresAt,
-      lastSentAt: new Date(),
+      email: normalizedEmail,
+      purpose: OTP_PURPOSE.EMAIL_VERIFY,
+      activeOnlyCooldown: true,
     });
-
-    await emailProvider.sendOtp(normalizedEmail, otp);
 
     return {
       isResend: true,
@@ -180,7 +264,7 @@ async function registerRider({ email, password, role, phone }) {
         [
           {
             userId: createdUser._id,
-            purpose: "EMAIL_VERIFY",
+            purpose: OTP_PURPOSE.EMAIL_VERIFY,
             codeHash,
             expiresAt,
             lastSentAt: new Date(),
@@ -199,7 +283,7 @@ async function registerRider({ email, password, role, phone }) {
   await session.endSession();
 
   // Send OTP after transaction commits
-  await emailProvider.sendOtp(normalizedEmail, otp);
+  await emailProvider.sendOtp(normalizedEmail, otp, { purpose: OTP_PURPOSE.EMAIL_VERIFY });
   await recordAudit({
     actorUserId: createdUser._id,
     action: "RIDER_REGISTERED",
@@ -216,58 +300,84 @@ async function registerRider({ email, password, role, phone }) {
   };
 }
 
-async function verifyOtp({ email, otp }) {
+async function forgotPassword({ email }) {
   const normalizedEmail = email.toLowerCase().trim();
+  const baseResponse = {
+    sent: true,
+    message: "If an account exists for this email, a verification code has been sent.",
+    resendAfterSeconds: deliveryEnv.OTP_RESEND_SECONDS,
+    expiresInSeconds: deliveryEnv.OTP_EXPIRY_SECONDS,
+  };
+
   const user = await RiderUser.findOne({ email: normalizedEmail });
-  if (!user) {
+  if (!user || user.status !== "ACTIVE") {
+    return baseResponse;
+  }
+
+  await issueOtpSession({
+    userId: user._id,
+    email: normalizedEmail,
+    purpose: OTP_PURPOSE.PASSWORD_RESET,
+  });
+
+  await recordAudit({
+    actorUserId: user._id,
+    action: "PASSWORD_RESET_OTP_SENT",
+    entity: "users",
+    entityId: user._id,
+  });
+
+  return baseResponse;
+}
+
+async function verifyOtp({ email, otp, flow = "REGISTER" }) {
+  const normalizedEmail = email.toLowerCase().trim();
+  const purpose = resolveOtpPurpose(flow);
+  const user = await RiderUser.findOne({ email: normalizedEmail });
+
+  if (!user || (purpose === OTP_PURPOSE.PASSWORD_RESET && user.status !== "ACTIVE")) {
     throw new AppError("UNAUTHENTICATED", 401, "Invalid email or OTP");
   }
 
-  const otpSession = await OtpSession.findOne({
-    userId: user._id,
-    purpose: "EMAIL_VERIFY",
-    consumedAt: null,
-  }).sort({ createdAt: -1 });
+  await verifyAndConsumeOtpSession({ userId: user._id, purpose, otp });
 
-  if (!otpSession) {
-    throw new AppError("OTP_EXPIRED", 422, "No active OTP found. Please request a new code.");
-  }
-
-  if (otpSession.expiresAt < new Date()) {
-    throw new AppError("OTP_EXPIRED", 422, "Verification code has expired");
-  }
-
-  if (otpSession.attempts >= deliveryEnv.OTP_MAX_ATTEMPTS) {
-    throw new AppError(
-      "OTP_ATTEMPTS_EXCEEDED",
-      429,
-      "Maximum verification attempts exceeded. Please request a new code."
+  if (purpose === OTP_PURPOSE.PASSWORD_RESET) {
+    const now = new Date();
+    await PasswordResetToken.updateMany(
+      { userId: user._id, usedAt: null },
+      { $set: { usedAt: now } }
     );
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = hashToken(resetToken);
+    const expiresAt = new Date(now.getTime() + deliveryEnv.RESET_TOKEN_EXPIRY_SECONDS * 1000);
+
+    await PasswordResetToken.create({
+      userId: user._id,
+      tokenHash,
+      expiresAt,
+    });
+
+    await recordAudit({
+      actorUserId: user._id,
+      action: "PASSWORD_RESET_OTP_VERIFIED",
+      entity: "users",
+      entityId: user._id,
+    });
+
+    return {
+      verified: true,
+      flow: "FORGOT_PASSWORD",
+      resetToken,
+      expiresInSeconds: deliveryEnv.RESET_TOKEN_EXPIRY_SECONDS,
+      user: {
+        id: user._id.toString(),
+        email: user.email,
+        role: user.role,
+      },
+    };
   }
 
-  // Verify OTP
-  const expectedHash = hmacSha256(otp, deliveryEnv.JWT_SECRET);
-  const isMock = deliveryEnv.PROVIDER_MODE === "mock" && otp === "123456";
-  const isValid = isMock || constantTimeCompare(otpSession.codeHash, expectedHash);
-
-  if (!isValid) {
-    const updated = await OtpSession.findByIdAndUpdate(
-      otpSession._id,
-      { $inc: { attempts: 1 } },
-      { new: true }
-    );
-    if (updated.attempts >= deliveryEnv.OTP_MAX_ATTEMPTS) {
-      throw new AppError(
-        "OTP_ATTEMPTS_EXCEEDED",
-        429,
-        "Maximum verification attempts exceeded. Please request a new code."
-      );
-    }
-    throw new AppError("OTP_INVALID", 422, "Invalid verification code");
-  }
-
-  // Mark consumed and verify email
-  await OtpSession.findByIdAndUpdate(otpSession._id, { consumedAt: new Date() });
   await RiderUser.findByIdAndUpdate(user._id, { emailVerifiedAt: new Date() });
 
   const accessToken = createAccessToken(user);
@@ -298,48 +408,42 @@ async function verifyOtp({ email, otp }) {
   };
 }
 
-async function resendOtp({ email }) {
+async function resendOtp({ email, flow = "REGISTER" }) {
   const normalizedEmail = email.toLowerCase().trim();
+  const purpose = resolveOtpPurpose(flow);
   const user = await RiderUser.findOne({ email: normalizedEmail });
+
+  if (purpose === OTP_PURPOSE.PASSWORD_RESET) {
+    if (!user || user.status !== "ACTIVE") {
+      return {
+        sent: true,
+        resendAfterSeconds: deliveryEnv.OTP_RESEND_SECONDS,
+        expiresInSeconds: deliveryEnv.OTP_EXPIRY_SECONDS,
+      };
+    }
+
+    await issueOtpSession({
+      userId: user._id,
+      email: normalizedEmail,
+      purpose: OTP_PURPOSE.PASSWORD_RESET,
+    });
+
+    return {
+      sent: true,
+      resendAfterSeconds: deliveryEnv.OTP_RESEND_SECONDS,
+      expiresInSeconds: deliveryEnv.OTP_EXPIRY_SECONDS,
+    };
+  }
+
   if (!user) {
     throw new AppError("NOT_FOUND", 404, "User not found with this email");
   }
 
-  const lastSession = await OtpSession.findOne({
+  await issueOtpSession({
     userId: user._id,
-    purpose: "EMAIL_VERIFY",
-  }).sort({ createdAt: -1 });
-
-  if (lastSession && Date.now() - lastSession.lastSentAt.getTime() < deliveryEnv.OTP_RESEND_SECONDS * 1000) {
-    const remainingSeconds = Math.ceil(
-      (deliveryEnv.OTP_RESEND_SECONDS * 1000 - (Date.now() - lastSession.lastSentAt.getTime())) / 1000
-    );
-    throw new AppError(
-      "RATE_LIMITED",
-      429,
-      `Please wait ${remainingSeconds} seconds before requesting a new OTP`,
-      { retryAfterSeconds: remainingSeconds }
-    );
-  }
-
-  await OtpSession.updateMany(
-    { userId: user._id, purpose: "EMAIL_VERIFY", consumedAt: null },
-    { consumedAt: new Date() }
-  );
-
-  const otp = generateOtp();
-  const codeHash = hmacSha256(otp, deliveryEnv.JWT_SECRET);
-  const expiresAt = new Date(Date.now() + deliveryEnv.OTP_EXPIRY_SECONDS * 1000);
-
-  await OtpSession.create({
-    userId: user._id,
-    purpose: "EMAIL_VERIFY",
-    codeHash,
-    expiresAt,
-    lastSentAt: new Date(),
+    email: normalizedEmail,
+    purpose: OTP_PURPOSE.EMAIL_VERIFY,
   });
-
-  await emailProvider.sendOtp(normalizedEmail, otp);
 
   return {
     sent: true,
@@ -348,24 +452,306 @@ async function resendOtp({ email }) {
   };
 }
 
-async function loginRider({ email, password }) {
-  const normalizedEmail = email.toLowerCase().trim();
+async function resetPassword({ email, resetToken, newPassword }) {
+  const tokenHash = hashToken(resetToken);
+  const now = new Date();
+
+  const tokenDoc = await PasswordResetToken.findOne({ tokenHash });
+  if (!tokenDoc || tokenDoc.usedAt || tokenDoc.expiresAt <= now) {
+    throw new AppError("RESET_TOKEN_INVALID", 401, "Invalid or expired reset token");
+  }
+
+  const user = await RiderUser.findById(tokenDoc.userId);
+  if (!user || user.status !== "ACTIVE") {
+    throw new AppError("RESET_TOKEN_INVALID", 401, "Invalid or expired reset token");
+  }
+
+  if (email && email.toLowerCase().trim() !== user.email) {
+    throw new AppError("RESET_TOKEN_INVALID", 401, "Invalid or expired reset token");
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+  const session = await mongoose.startSession();
+
+  try {
+    await session.withTransaction(async () => {
+      const claimed = await PasswordResetToken.findOneAndUpdate(
+        { _id: tokenDoc._id, usedAt: null, expiresAt: { $gt: now } },
+        { $set: { usedAt: now } },
+        { new: true, session }
+      );
+      if (!claimed) {
+        throw new AppError("RESET_TOKEN_INVALID", 401, "Invalid or expired reset token");
+      }
+
+      await PasswordResetToken.updateMany(
+        { userId: user._id, usedAt: null },
+        { $set: { usedAt: now } },
+        { session }
+      );
+
+      const userUpdate = { passwordHash };
+      if (!user.emailVerifiedAt) {
+        userUpdate.emailVerifiedAt = now;
+      }
+      await RiderUser.findByIdAndUpdate(user._id, userUpdate, { session });
+
+      await RefreshToken.updateMany(
+        { userId: user._id, revokedAt: null },
+        { $set: { revokedAt: now } },
+        { session }
+      );
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  await recordAudit({
+    actorUserId: user._id,
+    action: "PASSWORD_RESET_COMPLETED",
+    entity: "users",
+    entityId: user._id,
+  });
+
+  return {
+    reset: true,
+    message: "Password has been reset successfully",
+  };
+}
+
+function resolveServerTime(now) {
+  return now instanceof Date && !Number.isNaN(now.getTime()) ? now : new Date();
+}
+
+function buildFailedAttemptError(attemptDoc, now) {
+  const lockedUntil = attemptDoc?.lockedUntil ? new Date(attemptDoc.lockedUntil) : null;
+  if (lockedUntil && lockedUntil > now) {
+    const retryAfterSeconds = Math.max(1, Math.ceil((lockedUntil.getTime() - now.getTime()) / 1000));
+    return new AppError(
+      "ACCOUNT_LOCKED",
+      423,
+      "Too many failed login attempts. Account is temporarily locked for 24 hours. Please try again later.",
+      {
+        remainingAttempts: 0,
+        lockedUntil: lockedUntil.toISOString(),
+        retryAfterSeconds,
+      }
+    );
+  }
+
+  const maxAttempts = deliveryEnv.LOGIN_MAX_ATTEMPTS;
+  const attemptsUsed = Array.isArray(attemptDoc?.failedTimestamps) ? attemptDoc.failedTimestamps.length : 0;
+  const remainingAttempts = Math.max(0, maxAttempts - attemptsUsed);
+
+  return new AppError("INVALID_CREDENTIALS", 401, "Invalid email or password", {
+    remainingAttempts,
+  });
+}
+
+async function getActiveLoginLock(identifier, now) {
+  const existingAttempt = await LoginAttempt.findOne({ identifier }).lean();
+  if (existingAttempt?.lockedUntil && new Date(existingAttempt.lockedUntil) > now) {
+    return buildFailedAttemptError(existingAttempt, now);
+  }
+  return null;
+}
+
+function buildRecordFailedAttemptPipeline({
+  identifier,
+  now,
+  maxAttempts,
+  windowCutoff,
+  nextLockoutUntil,
+  nextWindowExpiry,
+  nextLockedRecordExpiry,
+}) {
+  const currentlyLockedExpr = {
+    $and: [
+      { $ne: [{ $ifNull: ["$lockedUntil", null] }, null] },
+      { $gt: ["$lockedUntil", now] },
+    ],
+  };
+
+  // Keep only failures inside the rolling 24h window that occurred after any prior expired lock.
+  const recentAttemptsExpr = {
+    $filter: {
+      input: { $ifNull: ["$failedTimestamps", []] },
+      as: "ts",
+      cond: {
+        $and: [
+          { $gt: ["$$ts", windowCutoff] },
+          {
+            $or: [
+              { $eq: [{ $ifNull: ["$lockedUntil", null] }, null] },
+              { $gt: ["$$ts", "$lockedUntil"] },
+            ],
+          },
+        ],
+      },
+    },
+  };
+
+  const nextTimestampsExpr = {
+    $slice: [{ $concatArrays: [recentAttemptsExpr, [now]] }, -maxAttempts],
+  };
+
+  const shouldLockNowExpr = {
+    $gte: [{ $size: nextTimestampsExpr }, maxAttempts],
+  };
+
+  return [
+    {
+      $set: {
+        identifier,
+        createdAt: { $ifNull: ["$createdAt", now] },
+        failedTimestamps: {
+          $cond: {
+            if: currentlyLockedExpr,
+            then: { $ifNull: ["$failedTimestamps", []] },
+            else: nextTimestampsExpr,
+          },
+        },
+        lockedUntil: {
+          $cond: {
+            if: currentlyLockedExpr,
+            then: "$lockedUntil",
+            else: {
+              $cond: {
+                if: shouldLockNowExpr,
+                then: nextLockoutUntil,
+                else: null,
+              },
+            },
+          },
+        },
+        expiresAt: {
+          $cond: {
+            if: currentlyLockedExpr,
+            then: { $ifNull: ["$expiresAt", nextLockedRecordExpiry] },
+            else: {
+              $cond: {
+                if: shouldLockNowExpr,
+                then: nextLockedRecordExpiry,
+                else: nextWindowExpiry,
+              },
+            },
+          },
+        },
+      },
+    },
+  ];
+}
+
+async function recordFailedLoginAttempt(identifier, now, actorUserId = null) {
+  const maxAttempts = deliveryEnv.LOGIN_MAX_ATTEMPTS;
+  const windowMs = deliveryEnv.LOGIN_ATTEMPT_WINDOW_MS;
+  const lockoutMs = deliveryEnv.LOGIN_LOCKOUT_MS;
+
+  const windowCutoff = new Date(now.getTime() - windowMs);
+  const nextLockoutUntil = new Date(now.getTime() + lockoutMs);
+  const nextWindowExpiry = new Date(now.getTime() + windowMs);
+  const nextLockedRecordExpiry = new Date(Math.max(nextWindowExpiry.getTime(), nextLockoutUntil.getTime()));
+
+  let updatedAttempt = null;
+  for (let retry = 0; retry < 5; retry += 1) {
+    try {
+      const pipeline = buildRecordFailedAttemptPipeline({
+        identifier,
+        now,
+        maxAttempts,
+        windowCutoff,
+        nextLockoutUntil,
+        nextWindowExpiry,
+        nextLockedRecordExpiry,
+      });
+
+      updatedAttempt = await LoginAttempt.findOneAndUpdate(
+        { identifier },
+        pipeline,
+        { upsert: true, new: true }
+      );
+      break;
+    } catch (err) {
+      // Concurrent first-time upserts on the unique identifier index can race once; retry against the created doc.
+      if (err && err.code === 11000 && retry < 4) {
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  const errToThrow = buildFailedAttemptError(updatedAttempt, now);
+
+  if (errToThrow.httpStatus === 423) {
+    await recordAudit({
+      actorUserId,
+      action: "RIDER_LOGIN_LOCKED",
+      entity: "login_attempts",
+      entityId: updatedAttempt?._id || "unknown",
+      meta: {
+        lockedUntil: errToThrow.details?.lockedUntil,
+      },
+    });
+  }
+
+  throw errToThrow;
+}
+
+async function clearFailedLoginAttempts(identifier, now) {
+  const unlockedReset = await LoginAttempt.findOneAndUpdate(
+    {
+      identifier,
+      $or: [{ lockedUntil: null }, { lockedUntil: { $lte: now } }],
+    },
+    {
+      $set: {
+        failedTimestamps: [],
+        lockedUntil: null,
+        expiresAt: new Date(now.getTime() + deliveryEnv.LOGIN_ATTEMPT_WINDOW_MS),
+      },
+    },
+    { new: true }
+  );
+
+  if (!unlockedReset) {
+    const activeLockError = await getActiveLoginLock(identifier, now);
+    if (activeLockError) {
+      throw activeLockError;
+    }
+  }
+}
+
+async function loginRider({ email, password }, options = {}) {
+  const now = resolveServerTime(options?.now);
+  const normalizedEmail = typeof email === "string" ? email.toLowerCase().trim() : "";
+
+  if (!normalizedEmail || typeof password !== "string" || password.length === 0) {
+    throw new AppError("VALIDATION_ERROR", 400, "Email and password are required");
+  }
+
+  const activeLockError = await getActiveLoginLock(normalizedEmail, now);
+  if (activeLockError) {
+    throw activeLockError;
+  }
+
   const user = await RiderUser.findOne({ email: normalizedEmail }).select("+passwordHash");
 
   if (!user) {
     // Run dummy compare to thwart timing attacks
     await comparePassword(password, null);
-    throw new AppError("INVALID_CREDENTIALS", 401, "Invalid email or password");
+    await recordFailedLoginAttempt(normalizedEmail, now, null);
   }
 
   const isPasswordValid = await comparePassword(password, user.passwordHash);
   if (!isPasswordValid) {
-    throw new AppError("INVALID_CREDENTIALS", 401, "Invalid email or password");
+    await recordFailedLoginAttempt(normalizedEmail, now, user._id);
   }
 
   if (!user.emailVerifiedAt) {
     throw new AppError("EMAIL_NOT_VERIFIED", 403, "Please verify your email address before logging in");
   }
+
+  await clearFailedLoginAttempts(normalizedEmail, now);
 
   const accessToken = createAccessToken(user);
   const refreshToken = await createRefreshToken(user._id);
@@ -396,7 +782,7 @@ async function loginRider({ email, password }) {
 }
 
 async function refreshTokens(rawToken) {
-  const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+  const tokenHash = hashToken(rawToken);
   const storedToken = await RefreshToken.findOne({ tokenHash });
 
   if (!storedToken) {
@@ -419,7 +805,7 @@ async function refreshTokens(rawToken) {
 
   // Rotate token: revoke current and replace with new
   const newRawToken = crypto.randomBytes(32).toString("hex");
-  const newTokenHash = crypto.createHash("sha256").update(newRawToken).digest("hex");
+  const newTokenHash = hashToken(newRawToken);
   const newExpiresAt = new Date(Date.now() + deliveryEnv.REFRESH_TTL_DAYS * 86400 * 1000);
 
   await RefreshToken.findByIdAndUpdate(storedToken._id, {
@@ -461,8 +847,10 @@ async function updateContact(userId, phone) {
 module.exports = {
   determineCurrentStep,
   registerRider,
+  forgotPassword,
   verifyOtp,
   resendOtp,
+  resetPassword,
   loginRider,
   refreshTokens,
   updateContact,

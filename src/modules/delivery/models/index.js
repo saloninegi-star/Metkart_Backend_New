@@ -492,6 +492,33 @@ const auditLogSchema = new mongoose.Schema(
 auditLogSchema.index({ entity: 1, entityId: 1, createdAt: 1 });
 auditLogSchema.index({ actorUserId: 1, createdAt: 1 });
 
+// 20. PasswordResetToken Schema (password_reset_tokens collection)
+const passwordResetTokenSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "RiderUser", required: true },
+    tokenHash: { type: String, required: true },
+    expiresAt: { type: Date, required: true },
+    usedAt: { type: Date, default: null },
+  },
+  { timestamps: true, collection: "password_reset_tokens" }
+);
+passwordResetTokenSchema.index({ tokenHash: 1 }, { unique: true });
+passwordResetTokenSchema.index({ userId: 1, usedAt: 1 });
+passwordResetTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+// 21. LoginAttempt Schema (login_attempts collection)
+const loginAttemptSchema = new mongoose.Schema(
+  {
+    identifier: { type: String, required: true, trim: true, lowercase: true },
+    failedTimestamps: { type: [Date], default: [] },
+    lockedUntil: { type: Date, default: null },
+    expiresAt: { type: Date, default: null },
+  },
+  { timestamps: true, collection: "login_attempts" }
+);
+loginAttemptSchema.index({ identifier: 1 }, { unique: true });
+loginAttemptSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
 // Helper to register models safely avoiding overwrite errors
 const getOrCreateModel = (name, schema, collection) => {
   return mongoose.models[name] || mongoose.model(name, schema, collection);
@@ -517,4 +544,6 @@ module.exports = {
   IdempotencyKey: getOrCreateModel("IdempotencyKey", idempotencyKeySchema, "idempotency_keys"),
   Counter: getOrCreateModel("Counter", counterSchema, "counters"),
   AuditLog: getOrCreateModel("AuditLog", auditLogSchema, "audit_log"),
+  PasswordResetToken: getOrCreateModel("PasswordResetToken", passwordResetTokenSchema, "password_reset_tokens"),
+  LoginAttempt: getOrCreateModel("LoginAttempt", loginAttemptSchema, "login_attempts"),
 };

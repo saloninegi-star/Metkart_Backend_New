@@ -26,18 +26,56 @@ const registerSchema = z
   })
   .strict();
 
+const otpFlowSchema = z
+  .enum(["REGISTER", "EMAIL_VERIFY", "FORGOT_PASSWORD", "PASSWORD_RESET"])
+  .optional()
+  .default("REGISTER");
+
 const verifyOtpSchema = z
   .object({
-    email: z.string().trim().toLowerCase().email(),
+    email: z.string().trim().toLowerCase().max(254).email("Must be a valid email address"),
     otp: z.string().trim().regex(/^\d{6}$/, "OTP must be exactly 6 digits"),
+    flow: otpFlowSchema,
   })
   .strict();
 
 const resendOtpSchema = z
   .object({
-    email: z.string().trim().toLowerCase().email(),
+    email: z.string().trim().toLowerCase().max(254).email("Must be a valid email address"),
+    flow: otpFlowSchema,
   })
   .strict();
+
+const forgotPasswordSchema = z
+  .object({
+    email: z.string().trim().toLowerCase().max(254).email("Must be a valid email address"),
+  })
+  .strict();
+
+const resetPasswordSchema = z
+  .object({
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .max(254)
+      .email("Must be a valid email address")
+      .optional(),
+    resetToken: z.string().trim().min(1, "resetToken is required"),
+    newPassword: z
+      .string()
+      .min(
+        deliveryEnv.PASSWORD_MIN_LENGTH,
+        `Password must be at least ${deliveryEnv.PASSWORD_MIN_LENGTH} characters`
+      )
+      .max(72, "Password must not exceed 72 characters"),
+    confirmPassword: z.string().min(1, "confirmPassword is required"),
+  })
+  .strict()
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "confirmPassword must match newPassword",
+    path: ["confirmPassword"],
+  });
 
 const loginSchema = z
   .object({
@@ -62,6 +100,8 @@ module.exports = {
   registerSchema,
   verifyOtpSchema,
   resendOtpSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   loginSchema,
   refreshSchema,
   contactSchema,

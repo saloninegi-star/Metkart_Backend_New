@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"riderId":{"$numberInt":"1"},"createdAt":{"$numberInt":"-1"}},"name":"riderId_1_createdAt_-1","background":true}],"uuid":"67395c7f9a554c5e91295eb229d99a3d","collectionName":"selfie_checks","type":"collection"}

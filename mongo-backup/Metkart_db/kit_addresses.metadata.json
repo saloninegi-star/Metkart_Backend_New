@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"riderId":{"$numberInt":"1"}},"name":"riderId_1","background":true,"unique":true}],"uuid":"449f276b46b5496a901c60a5f41ee0e6","collectionName":"kit_addresses","type":"collection"}

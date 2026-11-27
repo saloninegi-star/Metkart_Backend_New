@@ -45,12 +45,25 @@ function parseSender(fromValue, fallbackEmail) {
   };
 }
 
-function buildOtpEmailHtml(otp, fullName) {
+const OTP_EMAIL_TEMPLATES = {
+  EMAIL_VERIFY: {
+    subject: "Your Verification OTP - Metkart",
+    heading: "Verify Your Email",
+    bodyLine: "Your 6-digit verification code is:",
+  },
+  PASSWORD_RESET: {
+    subject: "Password Reset OTP - Metkart",
+    heading: "Reset Your Password",
+    bodyLine: "Your 6-digit password reset code is:",
+  },
+};
+
+function buildOtpEmailHtml(otp, fullName, template = OTP_EMAIL_TEMPLATES.EMAIL_VERIFY) {
   return `
       <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-        <h2 style="color: #165B33;">Verify Your Email</h2>
+        <h2 style="color: #165B33;">${template.heading}</h2>
         <p>Hi ${fullName},</p>
-        <p>Your 6-digit verification code is:</p>
+        <p>${template.bodyLine}</p>
         <div style="font-size: 28px; font-weight: bold; letter-spacing: 6px; color: #165B33; margin: 16px 0;">
           ${otp}
         </div>
@@ -95,9 +108,10 @@ async function sendViaBrevo({ toEmail, fullName, subject, htmlContent }) {
   return response.json();
 }
 
-const sendOtpEmail = async (toEmail, otp, fullName = "User") => {
-  const subject = "Your Verification OTP - Metkart";
-  const html = buildOtpEmailHtml(otp, fullName);
+const sendOtpEmail = async (toEmail, otp, fullName = "User", options = {}) => {
+  const template = OTP_EMAIL_TEMPLATES[options.purpose] || OTP_EMAIL_TEMPLATES.EMAIL_VERIFY;
+  const subject = options.subject || template.subject;
+  const html = buildOtpEmailHtml(otp, fullName, template);
   const mailOptions = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: toEmail,
