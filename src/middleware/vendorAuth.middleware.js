@@ -38,6 +38,11 @@ function authenticateVendor(jwtSecret = process.env.JWT_SECRET || "your_metkart_
     }
 
     req.vendor = vendor;
+    req.user = {
+      id: String(vendor._id),
+      email: vendor.email,
+      role: "vendor",
+    };
     next();
   });
 }

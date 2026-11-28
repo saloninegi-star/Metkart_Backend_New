@@ -28,6 +28,8 @@ const onboardingApprovalRoutes = require("./modules/admin/vendor/onboarding/onbo
 // Vendor Auth Routes (Send OTP / Verify OTP)
 // ==========================================
 const vendorAuthRoutes = require("./modules/vendor/auth/vendorAuth.routes");
+const vendorAuthController = require("./modules/vendor/auth/vendorAuth.controller");
+const authenticateVendor = require("./middleware/vendorAuth.middleware");
 const vendorDashboardRoutes = require("./modules/vendor/dashboard/dashboard.routes");
 const vendorOnboardingRoutes = require("./modules/vendor/onboarding/onboarding.routes");
 const vendorProductRoutes = require("./modules/vendor/products/products.routes");
@@ -168,6 +170,8 @@ function createApp(config) {
   // Vendor Authentication Routes Mounted Here
   // ==========================================
   app.use("/api/vendor/auth", vendorAuthRoutes);
+  app.post("/vendor/complete-registration", authenticateVendor(), vendorAuthController.completeRegistration);
+  app.post("/api/vendor/complete-registration", authenticateVendor(), vendorAuthController.completeRegistration);
   app.use("/api/vendor/dashboard", vendorDashboardRoutes);
   app.use("/api/vendor/onboarding", vendorOnboardingRoutes);
   app.use("/api/vendor/products", vendorProductRoutes);

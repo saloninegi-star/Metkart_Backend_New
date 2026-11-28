@@ -211,6 +211,10 @@ const vendorSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isProfileCompleted: {
+      type: Boolean,
+      default: false,
+    },
     // Role / Onboarding identification
     roleType: {
       type: String,
