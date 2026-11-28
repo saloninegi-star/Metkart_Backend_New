@@ -1,236 +1,321 @@
-const jwt = require("jsonwebtoken");
-const User = require("./user.model");
-const { sendOtpEmail } = require("../../../utils/mailer");
+const bcrypt = require('bcryptjs');
+const User = require('./user.model');
+const {
+  DUMMY_OTP,
+  isProductionEnv,
+  normalizeEmail,
+  isValidEmail,
+  isValidPhone,
+  buildLockPayload,
+  checkAndClearOtpLock,
+  signRoleToken,
+  getAccountRestrictionError,
+  findOneByEmailWithPassword,
+  issueAndSendOtp,
+  validateAndConsumeOtp,
+  authenticateWithPassword,
+} = require('../../../utils/otpAuth');
 
-const generateOtp = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
+function buildUserSummary(user) {
+  const emailVerified = Boolean(user.isVerified || user.isEmailVerified);
+  return {
+    id: user._id,
+    _id: user._id,
+    fullName: user.fullName,
+    email: user.email,
+    mobileNumber: user.mobileNumber,
+    currentAddress: user.currentAddress,
+    isVerified: emailVerified,
+    isEmailVerified: emailVerified,
+  };
+}
 
-const generateToken = (user) => {
-  return jwt.sign(
-    { id: user._id, email: user.email, role: "user" },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
-  );
-};
-
-// 1. REGISTER USER (Send OTP)
+/**
+ * @desc    Register user with fullName, email, mobileNumber, currentAddress & password, then send OTP
+ * @route   POST /api/user/auth/register
+ */
 const registerUser = async (req, res) => {
   try {
-    const { fullName, email, mobileNumber, currentAddress } = req.body;
+    const { fullName, email, mobileNumber, currentAddress, password } = req.body || {};
 
-    if (!fullName || !email || !mobileNumber || !currentAddress) {
+    const trimmedName = typeof fullName === 'string' ? fullName.trim() : '';
+    const normalizedEmail = normalizeEmail(email);
+    const trimmedMobile = typeof mobileNumber === 'string' ? mobileNumber.trim() : '';
+    const trimmedAddress = typeof currentAddress === 'string' ? currentAddress.trim() : '';
+
+    if (!trimmedName || !normalizedEmail || !trimmedMobile || !trimmedAddress || typeof password !== 'string') {
       return res.status(400).json({
         success: false,
-        message: "fullName, email, mobileNumber and currentAddress are required",
+        message: 'fullName, email, mobileNumber, currentAddress, and password are required.',
       });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (trimmedName.length > 120) {
+      return res.status(400).json({
+        success: false,
+        message: 'fullName must be at most 120 characters.',
+      });
+    }
 
-    if (existingUser && existingUser.isVerified) {
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address.',
+      });
+    }
+
+    if (!isValidPhone(trimmedMobile)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid mobileNumber.',
+      });
+    }
+
+    if (trimmedAddress.length > 500) {
+      return res.status(400).json({
+        success: false,
+        message: 'currentAddress must be at most 500 characters.',
+      });
+    }
+
+    if (password.length < 6 || password.length > 72) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be between 6 and 72 characters.',
+      });
+    }
+
+    let user = await findOneByEmailWithPassword(User, normalizedEmail);
+
+    const restriction = getAccountRestrictionError(user, 'User');
+    if (restriction) {
+      return res.status(restriction.status).json({
+        success: false,
+        message: restriction.message,
+      });
+    }
+
+    const now = new Date();
+    if (user) {
+      const lockStatus = checkAndClearOtpLock(user, now);
+      if (lockStatus.locked) {
+        return res.status(429).json(buildLockPayload(lockStatus.lockedUntil, now));
+      }
+
+      if ((user.isVerified || user.isEmailVerified) && user.passwordHash) {
+        return res.status(409).json({
+          success: false,
+          message: 'User already registered with this email. Please login with email and password.',
+        });
+      }
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const isNew = !user;
+
+    if (!user) {
+      user = new User({
+        fullName: trimmedName,
+        email: normalizedEmail,
+        mobileNumber: trimmedMobile,
+        currentAddress: trimmedAddress,
+        passwordHash,
+        isVerified: false,
+        isEmailVerified: false,
+        otpAttempts: 0,
+        otpLockedUntil: null,
+      });
+    } else {
+      user.fullName = trimmedName;
+      user.mobileNumber = trimmedMobile;
+      user.currentAddress = trimmedAddress;
+      user.passwordHash = passwordHash;
+      user.isVerified = false;
+      user.isEmailVerified = false;
+    }
+
+    await issueAndSendOtp(user, { recipientName: user.fullName || 'User', now });
+
+    return res.status(isNew ? 201 : 200).json({
+      success: true,
+      message: 'User registered successfully. OTP sent to your email.',
+      ...(!isProductionEnv() ? { dummyOtp: DUMMY_OTP } : {}),
+      user: buildUserSummary(user),
+    });
+  } catch (error) {
+    if (error?.code === 11000) {
       return res.status(409).json({
         success: false,
-        message: "Email already registered. Please login.",
+        message: 'A user with this email already exists.',
       });
     }
-
-    const otp = generateOtp();
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
-
-    let user;
-    if (existingUser && !existingUser.isVerified) {
-      existingUser.fullName = fullName.trim();
-      existingUser.mobileNumber = mobileNumber.trim();
-      existingUser.currentAddress = currentAddress.trim();
-      existingUser.otp = otp;
-      existingUser.otpExpiresAt = otpExpiresAt;
-      user = await existingUser.save();
-    } else {
-      user = await User.create({
-        fullName: fullName.trim(),
-        email: normalizedEmail,
-        mobileNumber: mobileNumber.trim(),
-        currentAddress: currentAddress.trim(),
-        otp,
-        otpExpiresAt,
-        isVerified: false,
-      });
-    }
-
-    await sendOtpEmail(user.email, otp, user.fullName);
-
-    return res.status(200).json({
-      success: true,
-      message: `Verification OTP sent to ${user.email}`,
-      data: { email: user.email },
-    });
-  } catch (error) {
-    console.error("User Register Error:", error);
+    console.error('User Register Error:', error);
     return res.status(500).json({
       success: false,
-      message: "Registration failed",
+      message: 'Server error while registering user.',
       error: error.message,
     });
   }
 };
 
-// 2. LOGIN USER (Send OTP)
+/**
+ * @desc    Login user with email and password
+ * @route   POST /api/user/auth/login
+ */
 const loginUser = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, password } = req.body || {};
+    const authResult = await authenticateWithPassword({
+      Model: User,
+      email,
+      password,
+      entityLabel: 'User',
+      isVerifiedFn: (user) => Boolean(user.isVerified || user.isEmailVerified),
+      noPasswordMessage: 'Password is not set for this account. Please register with a password.',
+    });
 
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is required",
-      });
+    if (!authResult.ok) {
+      return res.status(authResult.status).json(authResult.body);
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const user = await User.findOne({ email: normalizedEmail });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found. Please register first.",
-      });
-    }
-
-    if (!user.isVerified) {
-      return res.status(403).json({
-        success: false,
-        message: "Account not verified. Please complete registration OTP verification.",
-      });
-    }
-
-    const otp = generateOtp();
-    user.otp = otp;
-    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    await user.save();
-
-    await sendOtpEmail(user.email, otp, user.fullName);
+    const user = authResult.record;
+    const token = signRoleToken(user, 'user');
 
     return res.status(200).json({
       success: true,
-      message: `Login OTP sent to ${user.email}`,
-      data: { email: user.email },
+      message: 'Login successful!',
+      token,
+      user: buildUserSummary(user),
     });
   } catch (error) {
-    console.error("User Login Error:", error);
+    console.error('User Login Error:', error);
     return res.status(500).json({
       success: false,
-      message: "Login failed",
+      message: 'Server error while logging in.',
       error: error.message,
     });
   }
 };
 
-// 3. VERIFY OTP (Register + Login dono ke liye)
-const verifyOtp = async (req, res) => {
+/**
+ * @desc    Send or Resend OTP to registered user email (respects 24h lockout)
+ * @route   POST /api/user/auth/send-otp
+ * @route   POST /api/user/auth/resend-otp
+ */
+const sendOtp = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { email } = req.body || {};
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!email || !otp) {
+    if (!isValidEmail(normalizedEmail)) {
       return res.status(400).json({
         success: false,
-        message: "Email and OTP are required",
+        message: 'Please provide a valid email address.',
       });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
     const user = await User.findOne({ email: normalizedEmail });
-
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found",
+        message: 'User not found. Please register first.',
       });
     }
 
-    if (!user.otp || user.otp !== String(otp).trim()) {
-      return res.status(400).json({
+    const restriction = getAccountRestrictionError(user, 'User');
+    if (restriction) {
+      return res.status(restriction.status).json({
         success: false,
-        message: "Invalid OTP",
+        message: restriction.message,
       });
     }
 
-    if (!user.otpExpiresAt || user.otpExpiresAt < new Date()) {
+    const now = new Date();
+    const lockStatus = checkAndClearOtpLock(user, now);
+    if (lockStatus.locked) {
+      return res.status(429).json(buildLockPayload(lockStatus.lockedUntil, now));
+    }
+
+    await issueAndSendOtp(user, { recipientName: user.fullName || 'User', now });
+
+    return res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully to your email.',
+      ...(!isProductionEnv() ? { dummyOtp: DUMMY_OTP } : {}),
+    });
+  } catch (error) {
+    console.error('User Send/Resend OTP Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while sending OTP.',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc    Verify 6-digit email OTP (enforces 3 wrong attempts -> 24-hour lockout)
+ * @route   POST /api/user/auth/verify-otp
+ */
+const verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body || {};
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedOtp = otp !== undefined && otp !== null ? String(otp).trim() : '';
+
+    if (!normalizedEmail || !normalizedOtp) {
       return res.status(400).json({
         success: false,
-        message: "OTP has expired. Please resend OTP.",
+        message: 'Email and OTP are required.',
       });
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address.',
+      });
+    }
+
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found. Please register first.',
+      });
+    }
+
+    const restriction = getAccountRestrictionError(user, 'User');
+    if (restriction) {
+      return res.status(restriction.status).json({
+        success: false,
+        message: restriction.message,
+      });
+    }
+
+    const now = new Date();
+    const otpResult = await validateAndConsumeOtp(user, normalizedOtp, now);
+    if (!otpResult.ok) {
+      return res.status(otpResult.status).json(otpResult.body);
     }
 
     user.isVerified = true;
-    user.otp = null;
-    user.otpExpiresAt = null;
+    user.isEmailVerified = true;
     await user.save();
 
-    const token = generateToken(user);
+    const token = signRoleToken(user, 'user');
 
     return res.status(200).json({
       success: true,
-      message: "OTP verified successfully",
+      message: 'OTP verified successfully.',
       token,
-      user: {
-        _id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        mobileNumber: user.mobileNumber,
-        currentAddress: user.currentAddress,
-        isVerified: user.isVerified,
-      },
+      user: buildUserSummary(user),
     });
   } catch (error) {
-    console.error("Verify OTP Error:", error);
+    console.error('User Verify OTP Error:', error);
     return res.status(500).json({
       success: false,
-      message: "OTP verification failed",
-      error: error.message,
-    });
-  }
-};
-
-// 4. RESEND OTP
-const resendOtp = async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is required",
-      });
-    }
-
-    const normalizedEmail = email.toLowerCase().trim();
-    const user = await User.findOne({ email: normalizedEmail });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    const otp = generateOtp();
-    user.otp = otp;
-    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    await user.save();
-
-    await sendOtpEmail(user.email, otp, user.fullName);
-
-    return res.status(200).json({
-      success: true,
-      message: `OTP resent successfully to ${user.email}`,
-    });
-  } catch (error) {
-    console.error("Resend OTP Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to resend OTP",
+      message: 'Server error while verifying OTP.',
       error: error.message,
     });
   }
@@ -240,5 +325,7 @@ module.exports = {
   registerUser,
   loginUser,
   verifyOtp,
-  resendOtp,
+  sendOtp,
+  resendOtp: sendOtp,
+  buildUserSummary,
 };

@@ -1,15 +1,22 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const Vendor = require('./vendorAuth.model');
-const mailer = require('../../../utils/mailer');
+const {
+  DUMMY_OTP,
+  PHONE_REGEX,
+  isProductionEnv,
+  normalizeEmail,
+  isValidEmail,
+  buildLockPayload,
+  checkAndClearOtpLock,
+  signRoleToken,
+  getAccountRestrictionError,
+  findOneByEmailWithPassword,
+  issueAndSendOtp,
+  validateAndConsumeOtp,
+  authenticateWithPassword,
+} = require('../../../utils/otpAuth');
 
-const DUMMY_OTP = '123456';
-const OTP_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_OTP_ATTEMPTS = 3;
-const OTP_LOCK_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_REGEX = /^\+?[0-9\s()-]{8,20}$/;
 const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/i;
 const IFSC_REGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/i;
 const VALID_ROLE_TYPES = ['shopkeeper', 'restaurant', 'mechanic', 'scrapVendor', 'user'];
@@ -69,79 +76,12 @@ const REGISTRATION_ALLOWED_FIELDS = new Set([
   'userDetails',
 ]);
 
-function getJwtSecret() {
-  return process.env.JWT_SECRET || 'your_metkart_jwt_secret_key';
-}
-
-function isProductionEnv() {
-  return process.env.NODE_ENV === 'production';
-}
-
-function normalizeEmail(email) {
-  return typeof email === 'string' ? email.toLowerCase().trim() : '';
-}
-
-function isValidEmail(email) {
-  return Boolean(email && email.length <= 254 && EMAIL_REGEX.test(email));
-}
-
 function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 function isVendorProfileCompleted(vendor) {
   return Boolean(vendor?.isProfileCompleted || vendor?.isProfileComplete);
-}
-
-function buildLockPayload(lockedUntil, now = new Date()) {
-  const retryAfterSeconds = Math.max(
-    1,
-    Math.ceil((lockedUntil.getTime() - now.getTime()) / 1000)
-  );
-  return {
-    success: false,
-    message: 'Too many wrong OTP attempts. Please try again after 24 hours.',
-    lockedUntil,
-    retryAfterSeconds,
-  };
-}
-
-/**
- * Check if the vendor is currently locked out from OTP verification/sending.
- * Automatically clears expired locks after 24 hours.
- */
-function checkAndClearOtpLock(vendor, now = new Date()) {
-  if (!vendor?.otpLockedUntil) {
-    return { locked: false, unlocked: false };
-  }
-
-  const lockedUntilDate = new Date(vendor.otpLockedUntil);
-  if (lockedUntilDate > now) {
-    return { locked: true, lockedUntil: lockedUntilDate, unlocked: false };
-  }
-
-  // 24-hour lockout period has elapsed; reset attempt counters
-  vendor.otpLockedUntil = null;
-  vendor.otpAttempts = 0;
-  return { locked: false, unlocked: true };
-}
-
-function signVendorToken(vendor) {
-  return jwt.sign(
-    { id: vendor._id, email: vendor.email, role: 'vendor' },
-    getJwtSecret(),
-    { expiresIn: '30d' }
-  );
-}
-
-function getAccountRestrictionError(vendor) {
-  if (vendor?.deletedAt) {
-    return { status: 403, message: 'Vendor profile has been deleted.' };
-  }
-  if (vendor?.status === 'blocked') {
-    return { status: 403, message: 'Vendor account is blocked.' };
-  }
-  return null;
 }
 
 function buildVendorSummary(vendor) {
@@ -161,21 +101,8 @@ function buildVendorSummary(vendor) {
   };
 }
 
-async function issueAndSendOtp(vendor, now = new Date()) {
-  vendor.otp = DUMMY_OTP;
-  vendor.otpExpiresAt = new Date(now.getTime() + OTP_EXPIRY_MS);
-  await vendor.save();
-
-  const recipientName = vendor.ownerFullName || vendor.fullName || 'Vendor';
-  try {
-    await mailer.sendOtpEmail(vendor.email, DUMMY_OTP, recipientName);
-  } catch (mailError) {
-    // Keep dummy OTP flow working even if local SMTP credentials fail
-    console.warn(`[MetKart] Email OTP delivery failed for ${vendor.email}: ${mailError.message}`);
-  }
-  if (!isProductionEnv()) {
-    console.log(`[MetKart] Dummy OTP for ${vendor.email} is: ${DUMMY_OTP}`);
-  }
+function vendorRecipientName(vendor) {
+  return vendor.ownerFullName || vendor.fullName || 'Vendor';
 }
 
 /**
@@ -201,13 +128,9 @@ exports.register = async (req, res) => {
       });
     }
 
-    const query = Vendor.findOne({ email: normalizedEmail });
-    let vendor =
-      typeof query?.select === 'function'
-        ? await query.select('+passwordHash')
-        : await query;
+    let vendor = await findOneByEmailWithPassword(Vendor, normalizedEmail);
 
-    const restriction = getAccountRestrictionError(vendor);
+    const restriction = getAccountRestrictionError(vendor, 'Vendor');
     if (restriction) {
       return res.status(restriction.status).json({
         success: false,
@@ -257,7 +180,7 @@ exports.register = async (req, res) => {
       vendor.isEmailVerified = false;
     }
 
-    await issueAndSendOtp(vendor, now);
+    await issueAndSendOtp(vendor, { recipientName: vendorRecipientName(vendor), now });
 
     return res.status(isNew ? 201 : 200).json({
       success: true,
@@ -326,7 +249,7 @@ exports.sendOtp = async (req, res) => {
     }
 
     try {
-      await issueAndSendOtp(vendor, now);
+      await issueAndSendOtp(vendor, { recipientName: vendorRecipientName(vendor), now });
     } catch (saveErr) {
       // Handle race-condition duplicate email insert gracefully by reusing the created vendor
       if (saveErr?.code === 11000) {
@@ -343,7 +266,10 @@ exports.sendOtp = async (req, res) => {
         if (existingLock.locked) {
           return res.status(429).json(buildLockPayload(existingLock.lockedUntil, now));
         }
-        await issueAndSendOtp(existingVendor, now);
+        await issueAndSendOtp(existingVendor, {
+          recipientName: vendorRecipientName(existingVendor),
+          now,
+        });
       } else {
         throw saveErr;
       }
@@ -406,58 +332,11 @@ async function verifyOtpAndLogin(req, res) {
     }
 
     const now = new Date();
-    const lockStatus = checkAndClearOtpLock(vendor, now);
-    if (lockStatus.locked) {
-      return res.status(429).json(buildLockPayload(lockStatus.lockedUntil, now));
+    const otpResult = await validateAndConsumeOtp(vendor, normalizedOtp, now);
+    if (!otpResult.ok) {
+      return res.status(otpResult.status).json(otpResult.body);
     }
 
-    if (!vendor.otp) {
-      if (lockStatus.unlocked) {
-        await vendor.save();
-      }
-      return res.status(400).json({
-        success: false,
-        message: 'No active OTP found. Please request a new OTP.',
-      });
-    }
-
-    if (vendor.otpExpiresAt && new Date(vendor.otpExpiresAt) < now) {
-      if (lockStatus.unlocked) {
-        await vendor.save();
-      }
-      return res.status(400).json({
-        success: false,
-        message: 'OTP has expired. Please request a new one.',
-      });
-    }
-
-    if (vendor.otp !== normalizedOtp) {
-      vendor.otpAttempts = (vendor.otpAttempts || 0) + 1;
-
-      if (vendor.otpAttempts >= MAX_OTP_ATTEMPTS) {
-        const lockedUntil = new Date(now.getTime() + OTP_LOCK_DURATION_MS);
-        vendor.otpLockedUntil = lockedUntil;
-        vendor.otp = null;
-        vendor.otpExpiresAt = null;
-        await vendor.save();
-        return res.status(429).json(buildLockPayload(lockedUntil, now));
-      }
-
-      const remainingAttempts = MAX_OTP_ATTEMPTS - vendor.otpAttempts;
-      await vendor.save();
-      return res.status(400).json({
-        success: false,
-        message: `Invalid OTP. ${remainingAttempts} attempt(s) remaining.`,
-        attemptsUsed: vendor.otpAttempts,
-        remainingAttempts,
-      });
-    }
-
-    // OTP verified successfully: clear OTP state and attempt counters
-    vendor.otp = null;
-    vendor.otpExpiresAt = null;
-    vendor.otpAttempts = 0;
-    vendor.otpLockedUntil = null;
     vendor.isEmailVerified = true;
 
     // Preserve backward compatibility for existing vendors that only have isProfileComplete
@@ -466,7 +345,7 @@ async function verifyOtpAndLogin(req, res) {
     vendor.isProfileComplete = isProfileCompleted;
     await vendor.save();
 
-    const token = signVendorToken(vendor);
+    const token = signRoleToken(vendor, 'vendor');
 
     const isNewUser = !isProfileCompleted;
     return res.status(200).json({
@@ -496,67 +375,26 @@ async function verifyOtpAndLogin(req, res) {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body || {};
-    const normalizedEmail = normalizeEmail(email);
+    const authResult = await authenticateWithPassword({
+      Model: Vendor,
+      email,
+      password,
+      entityLabel: 'Vendor',
+      isVerifiedFn: (vendor) => Boolean(vendor.isEmailVerified),
+      noPasswordMessage:
+        'Password is not set for this account. Please register with a password or login with OTP.',
+    });
 
-    if (!normalizedEmail || typeof password !== 'string' || password.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email and password are required.',
-      });
+    if (!authResult.ok) {
+      return res.status(authResult.status).json(authResult.body);
     }
 
-    if (!isValidEmail(normalizedEmail)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide a valid email address.',
-      });
-    }
-
-    const query = Vendor.findOne({ email: normalizedEmail });
-    const vendor =
-      typeof query?.select === 'function'
-        ? await query.select('+passwordHash')
-        : await query;
-
-    if (!vendor) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password.',
-      });
-    }
-
-    const restriction = getAccountRestrictionError(vendor);
-    if (restriction) {
-      return res.status(restriction.status).json({
-        success: false,
-        message: restriction.message,
-      });
-    }
-
-    if (!vendor.isEmailVerified) {
-      return res.status(403).json({
-        success: false,
-        message: 'Email is not verified. Please verify your email with OTP first.',
-      });
-    }
-
-    if (!vendor.passwordHash) {
-      return res.status(401).json({
-        success: false,
-        message: 'Password is not set for this account. Please register with a password or login with OTP.',
-      });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, vendor.passwordHash);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password.',
-      });
-    }
-
+    const vendor = authResult.record;
     const isProfileCompleted = isVendorProfileCompleted(vendor);
-    if (vendor.isProfileCompleted !== isProfileCompleted || vendor.isProfileComplete !== isProfileCompleted) {
+    if (
+      vendor.isProfileCompleted !== isProfileCompleted ||
+      vendor.isProfileComplete !== isProfileCompleted
+    ) {
       vendor.isProfileCompleted = isProfileCompleted;
       vendor.isProfileComplete = isProfileCompleted;
       if (typeof vendor.save === 'function') {
@@ -564,7 +402,7 @@ exports.login = async (req, res) => {
       }
     }
 
-    const token = signVendorToken(vendor);
+    const token = signRoleToken(vendor, 'vendor');
     const isNewUser = !isProfileCompleted;
 
     return res.status(200).json({

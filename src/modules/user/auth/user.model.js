@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
@@ -24,6 +25,11 @@ const userSchema = new mongoose.Schema(
       required: [true, "Current address is required"],
       trim: true,
     },
+    passwordHash: {
+      type: String,
+      select: false,
+      default: null,
+    },
     otp: {
       type: String,
       default: null,
@@ -32,13 +38,39 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    otpAttempts: {
+      type: Number,
+      default: 0,
+    },
+    otpLockedUntil: {
+      type: Date,
+      default: null,
+    },
     isVerified: {
       type: Boolean,
       default: false,
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
+    status: {
+      type: String,
+      enum: ["active", "blocked"],
+      default: "active",
+    },
   },
   { timestamps: true }
 );
+
+userSchema.methods.comparePassword = function comparePassword(password) {
+  if (!this.passwordHash) return Promise.resolve(false);
+  return bcrypt.compare(password, this.passwordHash);
+};
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
