@@ -12,7 +12,7 @@ const {
 // Register vendor with email and password (sends OTP to email)
 router.post('/register', register);
 
-// Login vendor with email and OTP
+// Login vendor with email and password
 router.post('/login', login);
 
 // Send / Resend OTP to vendor email (auto-creates record for new emails)

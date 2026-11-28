@@ -234,7 +234,7 @@ test("3 wrong OTP attempts lock vendor for 24 hours across verify-otp, send-otp,
 
     // Wrong attempt 1 -> 2 remaining
     const attempt1 = await request(app)
-      .post("/api/vendor/auth/login")
+      .post("/api/vendor/auth/verify-otp")
       .send({ email: vendor.email, otp: "000001" });
     assert.equal(attempt1.status, 400);
     assert.equal(attempt1.body.attemptsUsed, 1);
@@ -583,5 +583,200 @@ test("register and send-otp still succeed with dummy OTP 123456 if SMTP throws E
     Vendor.findOne = originalFindOne;
     Vendor.prototype.save = originalSave;
     mailer.sendOtpEmail = originalSendOtpEmail;
+  }
+});
+
+test("complete vendor password registration -> OTP verification -> 24h lock -> email+password login flow", async () => {
+  const originalFindOne = Vendor.findOne;
+  const originalSave = Vendor.prototype.save;
+  const originalSendOtpEmail = mailer.sendOtpEmail;
+
+  const store = new Map();
+  const sentEmails = [];
+
+  Vendor.findOne = ({ email }) => {
+    const doc = store.get(email) || null;
+    return {
+      select: async () => doc,
+      then: (resolve, reject) => Promise.resolve(doc).then(resolve, reject),
+    };
+  };
+  Vendor.prototype.save = async function saveStub() {
+    store.set(this.email, this);
+    return this;
+  };
+  mailer.sendOtpEmail = async (toEmail, otp, name) => {
+    sentEmails.push({ toEmail, otp, name });
+    return { messageId: "mock-id" };
+  };
+
+  try {
+    const app = createApp({ jwtSecret: JWT_SECRET, corsOrigin: "*" });
+
+    // 1. Register with email & password -> sends OTP via Send OTP helper
+    const regRes = await request(app)
+      .post("/api/vendor/auth/register")
+      .send({ email: "rohit@gmail.com", password: "Password@123" });
+
+    assert.equal(regRes.status, 201);
+    assert.equal(regRes.body.success, true);
+    assert.equal(regRes.body.dummyOtp, "123456");
+    assert.equal(sentEmails.length, 1);
+    assert.equal(sentEmails[0].toEmail, "rohit@gmail.com");
+    assert.equal(sentEmails[0].otp, "123456");
+
+    const vendor = store.get("rohit@gmail.com");
+    assert.ok(vendor.passwordHash);
+    assert.equal(vendor.isEmailVerified, false);
+
+    // 2. Password login BEFORE email verification must fail with 403
+    const unverifiedLogin = await request(app)
+      .post("/api/vendor/auth/login")
+      .send({ email: "rohit@gmail.com", password: "Password@123" });
+    assert.equal(unverifiedLogin.status, 403);
+    assert.match(unverifiedLogin.body.message, /not verified/i);
+
+    // 3. Enter wrong OTP 3 times during email verification -> 24h lock
+    for (let i = 1; i <= 2; i += 1) {
+      const wrongRes = await request(app)
+        .post("/api/vendor/auth/verify-otp")
+        .send({ email: "rohit@gmail.com", otp: `00000${i}` });
+      assert.equal(wrongRes.status, 400);
+      assert.equal(wrongRes.body.remainingAttempts, 3 - i);
+    }
+
+    const thirdWrong = await request(app)
+      .post("/api/vendor/auth/verify-otp")
+      .send({ email: "rohit@gmail.com", otp: "000003" });
+    assert.equal(thirdWrong.status, 429);
+    assert.match(thirdWrong.body.message, /24 hours/i);
+
+    // 4. After 24 hours pass, request OTP again and verify -> registration verified
+    vendor.otpLockedUntil = new Date(Date.now() - 1000);
+    const resendRes = await request(app)
+      .post("/api/vendor/auth/send-otp")
+      .send({ email: "rohit@gmail.com" });
+    assert.equal(resendRes.status, 200);
+    assert.equal(vendor.otpLockedUntil, null);
+    assert.equal(vendor.otpAttempts, 0);
+
+    const verifyRes = await request(app)
+      .post("/api/vendor/auth/verify-otp")
+      .send({ email: "rohit@gmail.com", otp: "123456" });
+    assert.equal(verifyRes.status, 200);
+    assert.equal(verifyRes.body.success, true);
+    assert.equal(vendor.isEmailVerified, true);
+    assert.ok(verifyRes.body.token);
+
+    // 5. Re-registering same verified email+password returns 409 directing to email+password login
+    const dupReg = await request(app)
+      .post("/api/vendor/auth/register")
+      .send({ email: "rohit@gmail.com", password: "Password@123" });
+    assert.equal(dupReg.status, 409);
+    assert.match(dupReg.body.message, /email and password/i);
+
+    // 6. Login with email and wrong password fails with 401
+    const wrongPassLogin = await request(app)
+      .post("/api/vendor/auth/login")
+      .send({ email: "rohit@gmail.com", password: "WrongPassword" });
+    assert.equal(wrongPassLogin.status, 401);
+    assert.match(wrongPassLogin.body.message, /invalid email or password/i);
+
+    // 7. Login with correct email and password succeeds with 30d JWT
+    const okLogin = await request(app)
+      .post("/api/vendor/auth/login")
+      .send({ email: "ROHIT@gmail.com", password: "Password@123" });
+    assert.equal(okLogin.status, 200);
+    assert.equal(okLogin.body.success, true);
+    assert.equal(okLogin.body.message, "Login successful!");
+    assert.equal(okLogin.body.vendor.email, "rohit@gmail.com");
+    assert.equal(okLogin.body.vendor.isEmailVerified, true);
+    assert.ok(okLogin.body.token);
+
+    const decoded = jwt.verify(okLogin.body.token, JWT_SECRET);
+    assert.equal(decoded.id, String(vendor._id));
+    assert.equal(decoded.role, "vendor");
+    assert.ok(decoded.exp - decoded.iat >= 29 * 86400);
+  } finally {
+    Vendor.findOne = originalFindOne;
+    Vendor.prototype.save = originalSave;
+    mailer.sendOtpEmail = originalSendOtpEmail;
+  }
+});
+
+test("vendor login validates credentials, missing password accounts, deleted, and blocked accounts", async () => {
+  const originalFindOne = Vendor.findOne;
+  const otpOnlyVendor = makeVendorRecord({
+    _id: "507f1f77bcf86cd799439031",
+    email: "otponly@example.com",
+    isEmailVerified: true,
+    passwordHash: null,
+  });
+  const deletedVendor = makeVendorRecord({
+    _id: "507f1f77bcf86cd799439032",
+    email: "deletedlogin@example.com",
+    isEmailVerified: true,
+    passwordHash: await bcrypt.hash("Password@123", 10),
+    deletedAt: new Date(),
+  });
+  const blockedVendor = makeVendorRecord({
+    _id: "507f1f77bcf86cd799439033",
+    email: "blockedlogin@example.com",
+    isEmailVerified: true,
+    passwordHash: await bcrypt.hash("Password@123", 10),
+    status: "blocked",
+  });
+
+  const docs = new Map([
+    [otpOnlyVendor.email, otpOnlyVendor],
+    [deletedVendor.email, deletedVendor],
+    [blockedVendor.email, blockedVendor],
+  ]);
+
+  Vendor.findOne = ({ email }) => {
+    const doc = docs.get(email) || null;
+    return {
+      select: async () => doc,
+      then: (resolve, reject) => Promise.resolve(doc).then(resolve, reject),
+    };
+  };
+
+  try {
+    const app = createApp({ jwtSecret: JWT_SECRET, corsOrigin: "*" });
+
+    const missingCreds = await request(app)
+      .post("/api/vendor/auth/login")
+      .send({ email: "vendor@example.com" });
+    assert.equal(missingCreds.status, 400);
+
+    const invalidEmail = await request(app)
+      .post("/api/vendor/auth/login")
+      .send({ email: "not-an-email", password: "Password@123" });
+    assert.equal(invalidEmail.status, 400);
+
+    const unknownUser = await request(app)
+      .post("/api/vendor/auth/login")
+      .send({ email: "nobody@example.com", password: "Password@123" });
+    assert.equal(unknownUser.status, 401);
+
+    const otpOnlyAttempt = await request(app)
+      .post("/api/vendor/auth/login")
+      .send({ email: otpOnlyVendor.email, password: "Password@123" });
+    assert.equal(otpOnlyAttempt.status, 401);
+    assert.match(otpOnlyAttempt.body.message, /password is not set/i);
+
+    const deletedAttempt = await request(app)
+      .post("/api/vendor/auth/login")
+      .send({ email: deletedVendor.email, password: "Password@123" });
+    assert.equal(deletedAttempt.status, 403);
+    assert.match(deletedAttempt.body.message, /deleted/i);
+
+    const blockedAttempt = await request(app)
+      .post("/api/vendor/auth/login")
+      .send({ email: blockedVendor.email, password: "Password@123" });
+    assert.equal(blockedAttempt.status, 403);
+    assert.match(blockedAttempt.body.message, /blocked/i);
+  } finally {
+    Vendor.findOne = originalFindOne;
   }
 });

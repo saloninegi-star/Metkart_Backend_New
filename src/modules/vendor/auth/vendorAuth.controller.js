@@ -126,6 +126,24 @@ function checkAndClearOtpLock(vendor, now = new Date()) {
   return { locked: false, unlocked: true };
 }
 
+function signVendorToken(vendor) {
+  return jwt.sign(
+    { id: vendor._id, email: vendor.email, role: 'vendor' },
+    getJwtSecret(),
+    { expiresIn: '30d' }
+  );
+}
+
+function getAccountRestrictionError(vendor) {
+  if (vendor?.deletedAt) {
+    return { status: 403, message: 'Vendor profile has been deleted.' };
+  }
+  if (vendor?.status === 'blocked') {
+    return { status: 403, message: 'Vendor account is blocked.' };
+  }
+  return null;
+}
+
 function buildVendorSummary(vendor) {
   const profileCompleted = isVendorProfileCompleted(vendor);
   return {
@@ -189,10 +207,11 @@ exports.register = async (req, res) => {
         ? await query.select('+passwordHash')
         : await query;
 
-    if (vendor?.deletedAt) {
-      return res.status(403).json({
+    const restriction = getAccountRestrictionError(vendor);
+    if (restriction) {
+      return res.status(restriction.status).json({
         success: false,
-        message: 'Vendor profile has been deleted.',
+        message: restriction.message,
       });
     }
 
@@ -206,7 +225,7 @@ exports.register = async (req, res) => {
       if (vendor.isEmailVerified && vendor.passwordHash) {
         return res.status(409).json({
           success: false,
-          message: 'Vendor already registered with this email. Please login with email and OTP.',
+          message: 'Vendor already registered with this email. Please login with email and password.',
         });
       }
     }
@@ -235,9 +254,7 @@ exports.register = async (req, res) => {
         vendor.fullName = displayName;
         vendor.ownerFullName = displayName;
       }
-      if (!vendor.isEmailVerified) {
-        vendor.isEmailVerified = false;
-      }
+      vendor.isEmailVerified = false;
     }
 
     await issueAndSendOtp(vendor, now);
@@ -283,10 +300,11 @@ exports.sendOtp = async (req, res) => {
 
     let vendor = await Vendor.findOne({ email: normalizedEmail });
 
-    if (vendor?.deletedAt) {
-      return res.status(403).json({
+    const restriction = getAccountRestrictionError(vendor);
+    if (restriction) {
+      return res.status(restriction.status).json({
         success: false,
-        message: 'Vendor profile has been deleted.',
+        message: restriction.message,
       });
     }
 
@@ -314,10 +332,11 @@ exports.sendOtp = async (req, res) => {
       if (saveErr?.code === 11000) {
         const existingVendor = await Vendor.findOne({ email: normalizedEmail });
         if (!existingVendor) throw saveErr;
-        if (existingVendor.deletedAt) {
-          return res.status(403).json({
+        const existingRestriction = getAccountRestrictionError(existingVendor);
+        if (existingRestriction) {
+          return res.status(existingRestriction.status).json({
             success: false,
-            message: 'Vendor profile has been deleted.',
+            message: existingRestriction.message,
           });
         }
         const existingLock = checkAndClearOtpLock(existingVendor, now);
@@ -378,10 +397,11 @@ async function verifyOtpAndLogin(req, res) {
       });
     }
 
-    if (vendor.deletedAt) {
-      return res.status(403).json({
+    const restriction = getAccountRestrictionError(vendor);
+    if (restriction) {
+      return res.status(restriction.status).json({
         success: false,
-        message: 'Vendor profile has been deleted.',
+        message: restriction.message,
       });
     }
 
@@ -446,11 +466,7 @@ async function verifyOtpAndLogin(req, res) {
     vendor.isProfileComplete = isProfileCompleted;
     await vendor.save();
 
-    const token = jwt.sign(
-      { id: vendor._id, email: vendor.email, role: 'vendor' },
-      getJwtSecret(),
-      { expiresIn: '30d' }
-    );
+    const token = signVendorToken(vendor);
 
     const isNewUser = !isProfileCompleted;
     return res.status(200).json({
@@ -474,6 +490,102 @@ async function verifyOtpAndLogin(req, res) {
 }
 
 /**
+ * @desc    Login vendor with email and password
+ * @route   POST /api/vendor/auth/login
+ */
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    const normalizedEmail = normalizeEmail(email);
+
+    if (!normalizedEmail || typeof password !== 'string' || password.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required.',
+      });
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address.',
+      });
+    }
+
+    const query = Vendor.findOne({ email: normalizedEmail });
+    const vendor =
+      typeof query?.select === 'function'
+        ? await query.select('+passwordHash')
+        : await query;
+
+    if (!vendor) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password.',
+      });
+    }
+
+    const restriction = getAccountRestrictionError(vendor);
+    if (restriction) {
+      return res.status(restriction.status).json({
+        success: false,
+        message: restriction.message,
+      });
+    }
+
+    if (!vendor.isEmailVerified) {
+      return res.status(403).json({
+        success: false,
+        message: 'Email is not verified. Please verify your email with OTP first.',
+      });
+    }
+
+    if (!vendor.passwordHash) {
+      return res.status(401).json({
+        success: false,
+        message: 'Password is not set for this account. Please register with a password or login with OTP.',
+      });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, vendor.passwordHash);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password.',
+      });
+    }
+
+    const isProfileCompleted = isVendorProfileCompleted(vendor);
+    if (vendor.isProfileCompleted !== isProfileCompleted || vendor.isProfileComplete !== isProfileCompleted) {
+      vendor.isProfileCompleted = isProfileCompleted;
+      vendor.isProfileComplete = isProfileCompleted;
+      if (typeof vendor.save === 'function') {
+        await vendor.save();
+      }
+    }
+
+    const token = signVendorToken(vendor);
+    const isNewUser = !isProfileCompleted;
+
+    return res.status(200).json({
+      success: true,
+      message: 'Login successful!',
+      isNewUser,
+      isProfileCompleted,
+      token,
+      vendor: buildVendorSummary(vendor),
+    });
+  } catch (error) {
+    console.error('login error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while logging in.',
+      error: error.message,
+    });
+  }
+};
+
+/**
  * Validate and extract Vendor schema registration fields from request body.
  */
 function parseAndValidateRegistration(body) {
@@ -493,8 +605,8 @@ function parseAndValidateRegistration(body) {
     typeof body.ownerFullName === 'string' && body.ownerFullName.trim()
       ? body.ownerFullName.trim()
       : typeof body.fullName === 'string' && body.fullName.trim()
-      ? body.fullName.trim()
-      : '';
+        ? body.fullName.trim()
+        : '';
   if (!resolvedName || resolvedName.length > 120) {
     errors.push('ownerFullName (or fullName) is required and must be at most 120 characters');
   }
@@ -630,10 +742,11 @@ exports.completeRegistration = async (req, res) => {
       });
     }
 
-    if (vendor.deletedAt) {
-      return res.status(403).json({
+    const restriction = getAccountRestrictionError(vendor);
+    if (restriction) {
+      return res.status(restriction.status).json({
         success: false,
-        message: 'Vendor profile has been deleted.',
+        message: restriction.message,
       });
     }
 
@@ -781,7 +894,6 @@ exports.completeRegistration = async (req, res) => {
   }
 };
 
-exports.login = verifyOtpAndLogin;
 exports.verifyOtp = verifyOtpAndLogin;
 exports.verifyOtpAndLogin = verifyOtpAndLogin;
 exports.buildVendorSummary = buildVendorSummary;
